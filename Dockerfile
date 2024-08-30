@@ -1,4 +1,5 @@
-FROM maven:3-openjdk-11-slim
+FROM maven:3-openjdk-11 
+#-slim
 
 ARG projectId=0
 ARG comitid=Local
@@ -20,6 +21,7 @@ RUN echo ${test2key} | awk '{print "export TEST2KEY="$0}'>> /newcatalina.sh
 RUN echo ${test8key} | awk '{print "export TEST8KEY="$0}'>> /newcatalina.sh
 RUN echo ${expresskey} | awk '{print "export EXPRESSKEY="$0}'>> /newcatalina.sh
 RUN echo ${iapbackend} | awk '{print "export IAPBACKEND="$0}'>> /newcatalina.sh
+RUN export MYDATE=$(date +"%d-%b-%Y_%H:%M:%S") && echo export LASTBUILD="\"$MYDATE\"" >> /newcatalina.sh
 RUN echo "" >> /newcatalina.sh
 
 # Install Tomcat
@@ -45,7 +47,7 @@ RUN rm -rf /opt/tomcat/webapps/ROOT
 RUN git clone https://github.com/bigdavros/hero-dev-repo
 
 WORKDIR /hero-dev-repo
-RUN mvn clean && mvn package
+RUN mvn package
 RUN mv target/demo-container.war /opt/tomcat/webapps/ROOT.war
 
 RUN sed 's/#!\/usr\/bin\/env bash//g' /opt/tomcat/bin/catalina.sh >> /newcatalina.sh && cp /newcatalina.sh /opt/tomcat/bin/catalina.sh && chmod +x /opt/tomcat/bin/catalina.sh

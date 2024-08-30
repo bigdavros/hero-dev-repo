@@ -668,7 +668,7 @@ function getAnnotationAssesmentId(){
             let request_ob = {
                 type: "AD",
                 subtype: "normal",
-                hashedAccountId: hashedAccountId,
+                hashedAccountId: userId,
                 action: "generate_assessment",
                 token: recapToken
             };                 
