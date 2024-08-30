@@ -678,7 +678,8 @@ function getAnnotationAssesmentId(){
 }
 
 function handleAnnotationGetAssessmentResponse(reply){
-    resultObj = JSON.parse(atob(reply.result));
+    ann64 = atob(reply.result);
+    ann64.substring(ann64.indexOf("assessments/")+12,ann64.indexOf("assessments/")+28);
     document.getElementById("annotationAssessmentId").value=resultObj.name;
 }
 
