@@ -678,9 +678,9 @@ function getAnnotationAssesmentId(){
 }
 
 function handleAnnotationGetAssessmentResponse(reply){
-    ann64 = atob(reply.result);
-    ann64.substring(ann64.indexOf("assessments/")+12,ann64.indexOf("assessments/")+28);
-    document.getElementById("annotationAssessmentId").value=resultObj.name;
+    let ann64 = atob(reply.result);
+    let name = ann64.substring(ann64.indexOf("assessments/")+12,ann64.indexOf("assessments/")+28);
+    document.getElementById("annotationAssessmentId").value=name;
 }
 
 function doAnnotation(){
