@@ -1,5 +1,4 @@
-FROM maven:3-openjdk-11 
-#-slim
+FROM maven:3-openjdk-11-slim
 
 ARG projectId=0
 ARG comitid=Local
