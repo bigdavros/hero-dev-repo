@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <title>Legacy Site Key</title>
+        <script src="https://www.google.com/recaptcha/api.js?render=6Lci4YQfAAAAAA-fBwm1ebTm7YpYvvFZeQlCoTLV"></script>
+        <script>
+            function getToken() {
+              grecaptcha.ready(function() {
+                grecaptcha.execute('6Lci4YQfAAAAAA-fBwm1ebTm7YpYvvFZeQlCoTLV', {action: 'test'}).then(function(token) {
+                    // Add your logic to submit to your backend server here.
+                    document.getElementById("token").innerHTML=token;
+                });
+              });
+            }
+        </script>
+    </head>
+    <body>
+        <p>This page has a legacy JavaScript call to create a token from the https://www.google.com/recaptcha/api.js?render=SITEKEY function.</p>
+        <p><pre>
+                function getToken() {
+                  grecaptcha.ready(function() {
+                    grecaptcha.execute('6Lci4YQfAAAAAA-fBwm1ebTm7YpYvvFZeQlCoTLV', {action: 'test'}).then(function(token) {
+                        // Add your logic to submit to your backend server here.
+                        document.getElementById("token").innerHTML=token;
+                    });
+                  });
+                }
+        </pre></p>
+        <p><input type="button" onclick="getToken();" value="Get token"><br><textarea rows=50 cols=100 id="token"></textarea></p>
+    </body>
+</html>

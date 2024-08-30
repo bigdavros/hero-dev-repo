@@ -1,0 +1,311 @@
+package com.demo;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Base64;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONObject;
+
+import com.google.cloud.recaptcha.passwordcheck.PasswordCheckResult;
+import com.google.cloud.recaptcha.passwordcheck.PasswordCheckVerification;
+import com.google.cloud.recaptcha.passwordcheck.PasswordCheckVerifier;
+
+import com.google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseServiceClient;
+import com.google.protobuf.ByteString;
+import com.google.recaptchaenterprise.v1.Assessment;
+import com.google.recaptchaenterprise.v1.CreateAssessmentRequest;
+import com.google.recaptchaenterprise.v1.Event;
+import com.google.recaptchaenterprise.v1.ProjectName;
+
+import java.util.List;
+
+import com.google.recaptchaenterprise.v1.PrivatePasswordLeakVerification;
+import com.google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseServiceSettings;
+import com.google.api.gax.core.NoCredentialsProvider;
+import com.google.api.gax.rpc.FixedHeaderProvider;
+
+import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest;
+import com.google.recaptchaenterprise.v1.AssessmentName;
+import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest.Annotation;
+
+
+
+/**
+ * API Servlet
+ */
+@WebServlet(urlPatterns = "/api")
+public class Api extends HttpServlet {
+    private String apiKey = System.getenv("APIKEY");
+    private String v3key = System.getenv("V3KEY");
+    private String v2key = System.getenv("V2KEY");
+    private String test2key = System.getenv("TEST2KEY");
+    private String test8key = System.getenv("TEST8KEY");
+    private String projectId = System.getenv("PROJECTID"); 
+
+    private RecaptchaEnterpriseServiceSettings settings(){
+        RecaptchaEnterpriseServiceSettings config;
+        try{
+            config = RecaptchaEnterpriseServiceSettings.newBuilder()
+            .setCredentialsProvider(NoCredentialsProvider.create())
+            .setHeaderProvider(
+                FixedHeaderProvider.create(
+                    "X-goog-api-key", apiKey, 
+                    "User-Agent", "Heroes reCAPTCHA Enterprise Example v0.0.1"))
+            .build();
+        }
+        catch(Exception e){
+            config = null;
+        }
+        return config;            
+    }          
+
+    private PLDReply checkHashes(String username, String password, String action, String token, String hashedAccountId, String siteKey) throws InterruptedException, IOException, Exception{
+        Reply reply = new Reply();
+        PLDReply pldReply = new PLDReply();
+        try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings())) {
+            PasswordCheckVerifier passwordLeak = new PasswordCheckVerifier();
+            PasswordCheckVerification verification = passwordLeak.createVerification(username,password).get();
+            PrivatePasswordLeakVerification pldVerification =
+            PrivatePasswordLeakVerification.newBuilder()
+                    .setLookupHashPrefix(ByteString.copyFrom(verification.getLookupHashPrefix()))
+                    .setEncryptedUserCredentialsHash(ByteString.copyFrom(verification.getEncryptedUserCredentialsHash()))
+                    .build();
+            reply.setData(pldVerification.toString());
+            Assessment requestAssessment =
+            Assessment.newBuilder().setPrivatePasswordLeakVerification(pldVerification).build();
+            Assessment response = client.createAssessment("projects/"+ projectId,requestAssessment);
+            PrivatePasswordLeakVerification credentials = response.getPrivatePasswordLeakVerification();
+            List<byte[]> leakMatchPrefixes =
+            credentials.getEncryptedLeakMatchPrefixesList().stream()
+                .map(ByteString::toByteArray)
+                .collect(Collectors.toList());
+
+            PasswordCheckResult result =
+                passwordLeak
+                    .verify(
+                        verification,
+                        credentials.getReencryptedUserCredentialsHash().toByteArray(),
+                        leakMatchPrefixes)
+                    .get();
+            reply.setResult(response.toString());
+            pldReply.setReply(reply);
+            pldReply.setPldResult(result.areCredentialsLeaked());
+        }
+        return pldReply;
+    }
+
+    private void annotate(String assessmentId) throws Exception{
+        try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings())) {
+            AnnotateAssessmentRequest annotateAssessmentRequest =
+                AnnotateAssessmentRequest.newBuilder()
+                    .setName(AssessmentName.of(projectId, assessmentId).toString())
+                    .setAnnotation(Annotation.LEGITIMATE)
+                    .build();
+            client.annotateAssessment(annotateAssessmentRequest);
+        }
+        catch(Exception e){
+            System.out.println("annotate error: "+e);
+        }
+    }
+
+    private Reply error(String msg){
+        Reply reply = new Reply();
+        reply.setData("error");
+        reply.setResult(msg);
+        return reply;
+    }
+
+    private Reply createAssessment(String projectID, Event event)
+    throws Exception {
+        Reply reply = new Reply();        
+        try {
+            try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings())) {
+                reply.setData(event.toString());
+                CreateAssessmentRequest createAssessmentRequest =
+                    CreateAssessmentRequest.newBuilder()
+                        .setParent(ProjectName.of(projectID).toString())
+                        .setAssessment(Assessment.newBuilder().setEvent(event).build())
+                        .build();
+                Assessment response = client.createAssessment(createAssessmentRequest);                   
+                reply.setResult(response.toString());
+            }
+        }
+        catch(Exception e){   
+            reply.setResult("Error with recaptchaclient: "+e);
+        }   
+        return reply;
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        PrintWriter gOut = resp.getWriter();
+        gOut.println("<html><head><title>Rick Roll</title></head><body>Not implemented <a href='//go/bishopmov2' alt='Rick roll me'>redirect...</a></body></html>");
+    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+        PrintWriter out = resp.getWriter();
+
+        StringBuffer jb = new StringBuffer();
+        String line = null;
+        try {
+            BufferedReader reader = req.getReader();
+            while ((line = reader.readLine()) != null)
+            jb.append(line);
+        } 
+        catch (Exception e) { 
+            throw new IOException("Error buffering JSON request string: "+e);
+        }
+
+        try {            
+            JSONObject jsonObject = new JSONObject(jb.toString());  
+            try{    
+                if(jsonObject.has("type") && jsonObject.has("subtype") && jsonObject.has("token") && jsonObject.has("action")){                    
+                    String type = jsonObject.getString("type");
+                    String subType = jsonObject.getString("subtype");
+                    String siteKey = v3key;
+                    if(type.equals("recap")){
+                        if(subType.equals("test2")){
+                            siteKey=test2key;
+                        }
+                        else if(subType.equals("test8")){
+                            siteKey=test8key;
+                        }
+                        else if(subType.equals("v2")){
+                            siteKey=v2key;
+                        }
+                        try{
+                            Event event = Event.newBuilder().setSiteKey(siteKey).setToken(jsonObject.getString("token")).setExpectedAction(jsonObject.getString("action")).build();
+                            Reply reply = createAssessment(projectId,event);
+                            // For a standard assessment, to make things cleaner in the demo, we want to remove the account defender enum.
+                            // It might not be present depending on the project state, so we check first before removing it.
+                            // The reply string will be base64 encoded, so you need to decode, do the test, then remove
+                            String adReplyCheck = new String(Base64.getDecoder().decode(reply.getResult()),"UTF-8");
+                            if(adReplyCheck.indexOf("account_defender_assessment")>-1){
+                                reply.setResult(adReplyCheck.substring(0,adReplyCheck.indexOf("account_defender_assessment")));
+                            }
+                            out.println(reply.asJSON());
+                        }
+                        catch(Exception e){
+                            throw new IOException("Error creating Reply object in normal assessment: "+e);
+                        }
+                                              
+                    }
+                    else if(type.equals("AD")){
+                        try{
+                            String hashedAccountId = jsonObject.getString("hashedAccountId");                                                          
+                            try{         
+                                Event.Builder eventBuilder =
+                                    Event.newBuilder()
+                                        .setSiteKey(siteKey)
+                                        .setToken(jsonObject.getString("token"))
+                                        .setExpectedAction(jsonObject.getString("action"));
+
+                                if(!subType.equals("creation")){ 
+                                    eventBuilder.setUserInfo(
+                                        com.google.recaptchaenterprise.v1.UserInfo.newBuilder()
+                                        .setAccountId(hashedAccountId)
+                                        .addUserIds(com.google.recaptchaenterprise.v1.UserId.newBuilder().setUsername("username1"))
+                                        .addUserIds(com.google.recaptchaenterprise.v1.UserId.newBuilder().setEmail("emailAddress@example.com"))
+                                        .addUserIds(com.google.recaptchaenterprise.v1.UserId.newBuilder().setPhoneNumber("+447123789456")));
+                                } 
+                                Event event = eventBuilder.build();
+                                Reply reply = createAssessment(projectId,event);
+
+                                /*
+                                 * For demonstation purposes, modify the response to show what the results look like for 
+                                 * SUSPICIOUS_LOGIN_ACTIVITY and SUSPICIOUS_ACCOUNT_CREATION flags.
+                                 */
+                                String newLabel = new String();
+
+                                if(subType.equals("unusual")){
+                                    newLabel = "SUSPICIOUS_LOGIN_ACTIVITY";
+                                }
+                                if(subType.equals("creation")){
+                                    newLabel = "SUSPICIOUS_ACCOUNT_CREATION";
+                                }
+                            
+                                if(subType.equals("unusual")||subType.equals("creation")){
+                                    String response = new String(Base64.getDecoder().decode(reply.getResult()),"UTF-8");                                    
+                                    // Depending on whether an annotation was performed, there could be a PROFILE_MATCH.
+                                    // If so we want to swap PROFILE match, if not we want to add a new label
+                                    if(response.indexOf("PROFILE_MATCH")>-1){
+                                        response = response.replace("PROFILE_MATCH", newLabel);
+                                    }
+                                    else{
+                                        response = response.replace(
+                                            "account_defender_assessment {", 
+                                            "account_defender_assessment {\n  labels: "+newLabel
+                                        );
+                                    }
+                                    reply.setResult(response);
+                                }
+                                out.println(reply.asJSON());
+                            }
+                            catch(Exception e){
+                                throw new IOException("Error creating Reply object in AD event: "+e);
+                            }
+                            
+                        }
+                        catch(Exception e){
+                            throw new IOException("Some error with making an AD object: "+e);
+                        }                        
+                    }
+                    else if(type.equals("PLD")){
+                        String username = jsonObject.getString("username");
+                        String password = jsonObject.getString("password");
+                        if(username.length()==0 || password.length()==0){
+                            out.println(error("Username or password empty").asJSON());
+                        }
+                        else{
+                            try{
+                                PLDReply recaptchaResponse = checkHashes(username,password,"standalone",null,null,siteKey);
+                                out.println(recaptchaResponse.asJSON());
+                            }
+                            catch(Exception e){
+                                out.println(e);
+                            }
+                        }                        
+                    }
+                    else{
+                        out.println(error("Nothing implemented for type '"+type+"'!").asJSON());
+                    }
+                }
+                else if(jsonObject.has("type") && jsonObject.getString("type").equals("annotation") && jsonObject.has("assessment_id")){
+                    /* 
+                      Annotation's don't have a JSON body in their response, so they are hard to demo. The
+                      normal makeRecaptchaAssessmentCall() won't work, and if you actually make an annotation
+                      nothing really comes back. So instead we'll return some fixed data that is visually a 
+                      little more interesting    
+                    */              
+                    // This is {"annotation":"LEGITIMATE"}
+                    String base64httpRequestBody = "eyJhbm5vdGF0aW9uIjoiTEVHSVRJTUFURSJ9"; 
+                    // This is a dmummy HTTP header and empty {}
+                    String base64httpReplyRaw = "SFRUUC8yIDIwMCBccjxicj4KY29udGVudC10eXBlOiBhcHBsaWNhdGlvbi9qc29uOyBjaGFyc2V0PVVURi04XHI8YnI+CnZhcnk6IFgtT3JpZ2luXHI8YnI+CnZhcnk6IFJlZmVyZXJccjxicj4KdmFyeTogT3JpZ2luLEFjY2VwdC1FbmNvZGluZ1xyPGJyPgpkYXRlOiBNb24sIDEzIEZlYiAyMDIzIDEwOjU4OjI2IEdNVFxyPGJyPgpzZXJ2ZXI6IHNjYWZmb2xkaW5nIG9uIEhUVFBTZXJ2ZXIyXHI8YnI+CmNhY2hlLWNvbnRyb2w6IHByaXZhdGVccjxicj4KeC14c3MtcHJvdGVjdGlvbjogMFxyPGJyPgp4LWZyYW1lLW9wdGlvbnM6IFNBTUVPUklHSU5ccjxicj4KeC1jb250ZW50LXR5cGUtb3B0aW9uczogbm9zbmlmZlxyPGJyPgphbHQtc3ZjOiBoMz0iOjQ0MyI7IG1hPTI1OTIwMDAsaDMtMjk9Ijo0NDMiOyBtYT0yNTkyMDAwXHI8YnI+CmFjY2VwdC1yYW5nZXM6IG5vbmVccjxicj4KXHI8YnI+Cnt9PGJyPg==";
+                    annotate(jsonObject.getString("assessment_id"));
+                    out.println("{\"data\":\""+base64httpRequestBody+"\",\"result\":\""+base64httpReplyRaw+"\"}");                        
+                }
+                else{
+                    // if no token, action, type or subtype                    
+                    if(!jsonObject.has("type")) out.println(error("Input not complete: no type").asJSON());
+                    if(!jsonObject.has("subType")) out.println(error("Input not complete: no subType").asJSON());
+                    if(!jsonObject.has("token")) out.println(error("Input not complete: no token").asJSON());
+                    if(!jsonObject.has("action")) out.println(error("Input not complete: no action").asJSON());
+                }
+            }
+            catch(Exception e){
+                throw new IOException("Error parsing JSON string: "+e);
+            }
+            
+        } catch (Exception e) {
+            throw new IOException("Error creating JSON object from request input JSON: \n"+jb.toString()+"\n\nStack strace: \n\n"+e);
+        }
+    }
+}

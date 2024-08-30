@@ -1,0 +1,38 @@
+{
+    "project-info":{
+        "description":"Variables for the Project",
+        "project-number":"724756488068",
+        "project-id":"recaptcha-demo-dlenehan"
+    },
+    "site-keys": { 
+        "description":"reCAPTCHA Enterprise site keys",
+        "v3":{
+            "description":"Website version 3 site key",
+            "value":"6LdqqAIqAAAAAEvzmLLCIjgA9xnxdHIsKMGDZbMt"
+        },
+        "v2":{
+            "description":"Website version 2 site key",
+            "value":"6LcLJKYfAAAAAEJrDlDUVBfHvCGWSye5bqeAhTvv"
+        },
+        "test2":{
+            "description":"Website test key that returns 0.2",
+            "value":"6LdiHaYfAAAAAOiiaD7c8SFGEMDEryzmmPfxpzIA"
+        },
+        "test8":{
+            "description":"Website test key that returns 0.8",
+            "value":"6LdzsKYfAAAAAO3tBuzO9ODLyFO0mnjywHCOvHCA"
+        },
+        "express":{
+            "description":"WAF Express Site Key",
+            "value":"6Lft1xMqAAAAANW9BV9l5zNK8BeT5Ma8BK0Sp3Fu"
+        }
+    },
+    "iap-info":{
+        "description":"The backend service used by IAP to verify the authenticity of x-goog-iap-jwt-assertion HTTP header",
+        "iap-audience":"/projects/724756488068/global/backendServices/6373393881675642399"
+    },
+    "account-defender":{
+        "description":"Salt used when hashing AD hashedAccountId's. Can be blank.",
+        "salt":";_uiOgbq4Dxjir^3}!gO!qXfhe6a(;3FOU@~~}G]$0Uco+h3$%f~£I¬3hTuG"
+    }
+}
