@@ -1,5 +1,27 @@
 FROM maven:3-openjdk-11-slim
 
+ARG projectId=0
+ARG comitid=Local
+ARG apikey=0
+ARG v3key=0
+ARG v2key=0
+ARG test2key=0
+ARG test8key=0
+ARG expresskey=0
+ARG iapbackend=0
+
+RUN echo "#!/usr/bin/env bash" > /newcatalina.sh
+RUN echo ${projectId} | awk '{print "export PROJECTID="$0}'>> /newcatalina.sh
+RUN echo ${comitid} | awk '{print "export COMMITID="$0}'>> /newcatalina.sh
+RUN echo ${apikey} | awk '{print "export APIKEY="$0}'>> /newcatalina.sh
+RUN echo ${v3key} | awk '{print "export V3KEY="$0}'>> /newcatalina.sh
+RUN echo ${v2key} | awk '{print "export V2KEY="$0}'>> /newcatalina.sh
+RUN echo ${test2key} | awk '{print "export TEST2KEY="$0}'>> /newcatalina.sh
+RUN echo ${test8key} | awk '{print "export TEST8KEY="$0}'>> /newcatalina.sh
+RUN echo ${expresskey} | awk '{print "export EXPRESSKEY="$0}'>> /newcatalina.sh
+RUN echo ${iapbackend} | awk '{print "export IAPBACKEND="$0}'>> /newcatalina.sh
+RUN echo "" >> /newcatalina.sh
+
 # Install Tomcat
 RUN groupadd tomcat
 RUN useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
@@ -18,36 +40,15 @@ WORKDIR /opt/tomcat
 RUN chgrp -R tomcat /opt/tomcat
 RUN chown -R tomcat webapps/ work/ temp/ logs/
 
-ARG development=false
-ARG filename=nosecrets.json # Optional default value to be `nosecrets.json`
-ARG apikey=AAA
-ARG legacykey=BBB
-ARG trustedkey=CCC
-ARG comitid=Local
-ARG sa=nosecrets.json
-
 WORKDIR /
 RUN rm -rf /opt/tomcat/webapps/ROOT
-ADD target/demo-container.war /opt/tomcat/webapps/ROOT.war
-ADD config.json /
-ADD config.sh /
-ADD make-secrets.sh /
+RUN git clone https://github.com/bigdavros/hero-dev-repo
 
-RUN chmod +x make-secrets.sh
+WORKDIR /hero-dev-repo
+RUN mvn clean && mvn package
+RUN mv target/demo-container.war /opt/tomcat/webapps/ROOT.war
 
-ADD ${filename} /
-
-RUN mkdir /secrets 
-
-RUN if [ "$development" = "true" ] ; then \
-    mv secrets.json /secrets/recaptcha-demo-secrets.json ; \
-fi 
-
-RUN if [ "$development" = "false" ] ; then \
-    /make-secrets.sh $apikey $legacykey $trustedkey; \
-fi 
-
-RUN chmod +x /config.sh && /config.sh ${comitid} && sed 's/#!\/usr\/bin\/env bash//g' /opt/tomcat/bin/catalina.sh >> /newcatalina.sh && cp /newcatalina.sh /opt/tomcat/bin/catalina.sh && chmod +x /opt/tomcat/bin/catalina.sh
+RUN sed 's/#!\/usr\/bin\/env bash//g' /opt/tomcat/bin/catalina.sh >> /newcatalina.sh && cp /newcatalina.sh /opt/tomcat/bin/catalina.sh && chmod +x /opt/tomcat/bin/catalina.sh
 
 EXPOSE 8080
 
