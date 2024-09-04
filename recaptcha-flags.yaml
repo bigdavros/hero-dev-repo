@@ -1,0 +1,2 @@
+- --api-target:
+    service: "recaptchaenterprise.googleapis.com"
