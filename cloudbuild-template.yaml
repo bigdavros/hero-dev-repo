@@ -1,17 +1,40 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  script: |
-    docker build -t REGION-docker.pkg.dev/PROJECT_ID/REPO_NAME/recaptcha-heroes-demo-image:tag1 \ 
-    --build-arg projectId=PROJECT_NUMBER \ 
-    --build-arg comitid=COMMITID \ 
-    --build-arg apikey=APIKEY \
-    --build-arg v3key=V3KEY \
-    --build-arg v2key=V2KEY \
-    --build-arg test2key=TEST2KEY \
-    --build-arg test8key=TEST8KEY \
-    --build-arg expresskey=EXPRESSKEY \
-    --build-arg iapbackend=value \
-    .
+  args: 
+   - '-c'
+   - >-
+    docker build --no-cache -t REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID 
+    --build-arg projectId=PROJECT_NUMBER --build-arg comitid=COMMITID --build-arg apikey=APIKEY 
+    --build-arg v3key=V3KEY --build-arg v2key=V2KEY 
+    --build-arg test2key=TEST2KEY --build-arg test8key=TEST8KEY 
+    --build-arg expresskey=EXPRESSKEY --build-arg iapbackend=value . -f Dockerfile
   automapSubstitutions: true
+  id: Build
+  entrypoint: bash
+- name: gcr.io/cloud-builders/docker
+  args:
+    - push
+    - >-
+      REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID
+  id: Push
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  args:
+    - run
+    - services
+    - update
+    - hero-service
+    - '--platform=managed'
+    - >-
+      --image=REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID
+    - >-
+      --labels=managed-by=gcp-cloud-build-deploy-cloud-run
+    - '--region=REGION'
+    - '--quiet'
+  id: Deploy
+  entrypoint: gcloud
 images:
-- 'REGION-docker.pkg.dev/PROJECT_ID/REPO_NAME/recaptcha-heroes-demo-image:tag1'
+  - 'REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID'
+logsBucket: 'gs://LOG_BUCKET'
+serviceAccount: 'projects/PROJECT_ID/serviceAccounts/SERVICE_ACCOUNT'
+options:
+  logging: GCS_ONLY
