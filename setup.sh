@@ -138,7 +138,7 @@ gcloud projects add-iam-policy-binding $PROJECT_NUMBER \
     --role='roles/cloudbuild.serviceAgent' \
     --role='roles/run.developer' \
     --role='roles/run.serviceAgent' \
-    --role='roles/logging.logWriter' 
+    --role='roles/logging.logWriter' \
     --role='roles/storage.admin' \
     --role='roles/run.admin' 
 
