@@ -109,7 +109,7 @@ gcloud compute project-info describe --project $GOOGLE_CLOUD_PROJECT
 PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
 COMMITID=$(git log --format="%H" -n 1)
 SERVICE_ACCOUNT=recaptcha-heroes-compute@$PROJECT_NAME.iam.gserviceaccount.com
-LOG_BUCKET=$PROJECT_NAME-recaptcha-heroes-logs
+LOG_BUCKET=$PROJECT_ID-recaptcha-heroes-logs
 
 APIKEY=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.keyString' | cut -d"\"" -f2)
 echo Created an API key for use by reCAPTCHA Enterprise
