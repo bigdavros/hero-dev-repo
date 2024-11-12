@@ -89,31 +89,18 @@ while : ; do
             ;;
     esac
 done
-
-gcloud services enable recaptchaenterprise.googleapis.com \
-    compute.googleapis.com \
-    storage.googleapis.com \
-
-if [ -z "$GOOGLE_CLOUD_PROJECT" ]
-then
-   echo Project not set!
-   echo What Project Id do you want to deploy the solution to?
-   read var_project_id
-   gcloud config set project $var_project_id
-   export PROJECT_ID=$var_project_id
-else
-   export PROJECT_ID=$GOOGLE_CLOUD_PROJECT
-fi
-
-#gcloud compute project-info describe --project $GOOGLE_CLOUD_PROJECT
-
-PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
 COMMITID=$(git log --format="%H" -n 1)
 SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
   --display-name "reCAPTCHA Heroes Compute Service Account"
-  
+
+gcloud services enable recaptchaenterprise.googleapis.com \
+    compute.googleapis.com \
+    storage.googleapis.com \
+
+#gcloud compute project-info describe --project $GOOGLE_CLOUD_PROJECT
+
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
 
 APIKEY=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.keyString' | cut -d"\"" -f2)
