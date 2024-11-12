@@ -136,6 +136,7 @@ gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
 
+cat cloudbuild.yaml
 echo gcloud builds submit --region=$REGION --config cloudbuild.yaml
 
 echo $0 "done."

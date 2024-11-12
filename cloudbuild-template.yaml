@@ -15,7 +15,7 @@ steps:
   args:
     - push
     - >-
-      REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID
+      REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo-SHORTCOMMIT/recaptcha-heroes-demo-image:COMMITID
   id: Push
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
   args:
