@@ -111,6 +111,9 @@ PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value projec
 COMMITID=$(git log --format="%H" -n 1)
 SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
+gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
+  --display-name "reCAPTCHA Heroes Compute Service Account"
+  
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
 
 APIKEY=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.keyString' | cut -d"\"" -f2)
@@ -128,8 +131,7 @@ echo Created express site-key $EXPRESSKEY
 
 sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_NAME/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
-gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
-  --display-name "reCAPTCHA Heroes Compute Service Account"
+
 gcloud storage buckets create gs://$LOG_BUCKET
 
 gcloud projects add-iam-policy-binding $PROJECT_NUMBER \
