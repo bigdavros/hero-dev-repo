@@ -110,7 +110,7 @@ fi
 PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
 COMMITID=$(git log --format="%H" -n 1)
 SHORTCOMMIT=${COMMITID: -5}
-SERVICE_ACCOUNT=recaptcha-heroes-$SHORTCOMMIT@$PROJECT_NAME.iam.gserviceaccount.com
+SERVICE_ACCOUNT=recaptcha-heroes-$SHORTCOMMIT@$PROJECT_ID.iam.gserviceaccount.com
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
 
 APIKEY=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.keyString' | cut -d"\"" -f2)
