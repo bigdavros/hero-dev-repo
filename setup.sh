@@ -1,30 +1,30 @@
 #!/bin/sh
 
-REGION=europe-west1
+export REGION=$(gcloud config get-value compute/zone)
+if [ -z "$REGION" ] then;
+    echo "Region not set";
+fi
 
-while true; do
-    read -p "Region is $REGION, change? (y/n): " yn
-    case $yn in
-        [Yy]* ) read -p "New region: " REGION;
-        while true; do
-            read -p "Change region to $REGION? (y/n): " conf 
-            case $conf in
-                [Yy]* ) break;;
-                [Nn]* ) exit;;
-                * ) echo "Please answer yes or no.";;
-            esac
-        done;                
-        break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
 
-gcloud services enable recaptchaenterprise.googleapis.com
-gcloud services enable compute.googleapis.com
-gcloud services enable storage.googleapis.com
 
-PROJECT_NAME=$(gcloud config get-value project 2>/dev/null)
+
+gcloud services enable recaptchaenterprise.googleapis.com \
+    compute.googleapis.com \
+    storage.googleapis.com \
+
+if [ -z "$GOOGLE_CLOUD_PROJECT" ]
+then
+   echo Project not set!
+   echo What Project Id do you want to deploy the solution to?
+   read var_project_id
+   gcloud config set project $var_project_id
+   export PROJECT_ID=$var_project_id
+else
+   export PROJECT_ID=$GOOGLE_CLOUD_PROJECT
+fi
+
+gcloud compute project-info describe --project $GOOGLE_CLOUD_PROJECT
+
 PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
 COMMITID=$(git log --format="%H" -n 1)
 SERVICE_ACCOUNT=recaptcha-heroes-compute@$PROJECT_NAME.iam.gserviceaccount.com
