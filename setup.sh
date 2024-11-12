@@ -128,7 +128,7 @@ echo Created express site-key $EXPRESSKEY
 
 sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_NAME/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
-gcloud iam service-accounts create recaptcha-heroes-compute-$COMMITID \
+gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
   --display-name "reCAPTCHA Heroes Compute Service Account"
 gcloud storage buckets create gs://$LOG_BUCKET
 
