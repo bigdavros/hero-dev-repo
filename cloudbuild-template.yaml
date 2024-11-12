@@ -25,7 +25,7 @@ steps:
     - hero-service
     - '--platform=managed'
     - >-
-      --image=REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID
+      --image=REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo-SHORTCOMMIT/recaptcha-heroes-demo-image:COMMITID
     - >-
       --labels=managed-by=gcp-cloud-build-deploy-cloud-run
     - '--region=REGION'
