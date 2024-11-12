@@ -3,7 +3,7 @@ steps:
   args: 
    - '-c'
    - >-
-    docker build --no-cache -t REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID 
+    docker build --no-cache -t REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo-SHORTCOMMIT/recaptcha-heroes-demo-image:COMMITID 
     --build-arg projectId=PROJECT_NUMBER --build-arg comitid=COMMITID --build-arg apikey=APIKEY 
     --build-arg v3key=V3KEY --build-arg v2key=V2KEY 
     --build-arg test2key=TEST2KEY --build-arg test8key=TEST8KEY 
@@ -33,7 +33,7 @@ steps:
   id: Deploy
   entrypoint: gcloud
 images:
-  - 'REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo/recaptcha-heroes-demo-image:COMMITID'
+  - 'REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo-SHORTCOMMIT/recaptcha-heroes-demo-image:COMMITID'
 logsBucket: 'gs://LOG_BUCKET'
 serviceAccount: 'projects/PROJECT_ID/serviceAccounts/SERVICE_ACCOUNT'
 options:
