@@ -99,9 +99,18 @@ gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$SERVICE_ACCOUNT \
     --role='roles/cloudbuild.integrations.owner' \
+    --role='roles/cloudbuild.builds.builder' \
+    --role='roles/cloudbuild.serviceAgent' \
+    --role='roles/cloudbuild.builds.editor' \
     --role='roles/logging.logWriter' \
     --role='roles/storage.admin' \
-    --role='roles/run.admin' 
+    --role='roles/run.admin' \
+    --role='roles/run.developer' \
+    --role='roles/run.serviceAgent' \
+    --role='roles/run.admin' \
+    --role='roles/storage.admin' \
+    --role='roles/storage.objectAdmin' \
+    --role='roles/storage.objectUser' 
 
 gcloud services enable recaptchaenterprise.googleapis.com \
     compute.googleapis.com \
