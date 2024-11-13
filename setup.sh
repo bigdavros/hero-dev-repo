@@ -98,19 +98,12 @@ gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$SERVICE_ACCOUNT \
+    --role='roles/artifactregistry.writer' \
     --role='roles/cloudbuild.integrations.owner' \
-    --role='roles/cloudbuild.builds.builder' \
-    --role='roles/cloudbuild.serviceAgent' \
-    --role='roles/cloudbuild.builds.editor' \
     --role='roles/logging.logWriter' \
-    --role='roles/storage.admin' \
-    --role='roles/run.admin' \
     --role='roles/run.developer' \
-    --role='roles/run.serviceAgent' \
-    --role='roles/run.admin' \
-    --role='roles/storage.admin' \
-    --role='roles/storage.objectAdmin' \
-    --role='roles/storage.objectUser' 
+    --role='roles/iam.serviceAccountUser' \
+    --role='roles/storage.objectUser'
 
 gcloud services enable recaptchaenterprise.googleapis.com \
     compute.googleapis.com \
@@ -140,8 +133,8 @@ sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVIC
 
 gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin' 
 
-echo gcloud storage buckets add-iam-policy-binding gs://hero-dev-dlenehan_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
-gcloud storage buckets add-iam-policy-binding gs://hero-dev-dlenehan_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
+echo gcloud storage buckets add-iam-policy-binding gs://${PROJECT_ID}_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
+gcloud storage buckets add-iam-policy-binding gs://${PROJECT_ID}_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
 
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
