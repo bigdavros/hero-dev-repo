@@ -110,32 +110,24 @@ echo "Granting permissions to $SERVICE_ACCOUNT"
 
 declare -a roles=(
    "roles/artifactregistry.writer"
-   "roles/cloudbuild.integrations.owner"
    "roles/cloudbuild.builds.builder"
+   "roles/cloudbuild.integrations.owner"
+   "roles/iam.serviceAccountUser"
    "roles/logging.logWriter"
    "roles/run.developer"
-   "roles/iam.serviceAccountUser"
    "roles/storage.objectUser"
 )
 
 for role in "${roles[@]}"
 do
     echo "Granting $role to $SERVICE_ACCOUNT"
-    echo gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled
+    echo gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" 
     gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled
+    echo ""
 done
-
-#gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/artifactregistry.writer' --no-user-output-enabled
-#gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/cloudbuild.integrations.owner'--no-user-output-enabled
-#gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/cloudbuild.builds.builder'--no-user-output-enabled
-#gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/logging.logWriter'--no-user-output-enabled
-#gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/run.developer'--no-user-output-enabled
-#gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/iam.serviceAccountUser'--no-user-output-enabled
-#gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.objectUser'--no-user-output-enabled
 
 echo "Check permissions on $SERVICE_ACCOUNT:"
 gcloud projects get-iam-policy $PROJECT_ID --flatten="bindings[].members" --format='table(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT" | grep "roles"
-
 
 gcloud services enable recaptchaenterprise.googleapis.com \
     compute.googleapis.com \
@@ -147,9 +139,9 @@ V3KEY=$(gcloud recaptcha keys create --display-name=heroes-score-site-key --web 
 echo Created score based site-key $V3KEY
 V2KEY=$(gcloud recaptcha keys create --display-name=heroes-checkbox-site-key --web --allow-all-domains --integration-type=checkbox 2>&1 | grep -Po '\[\K[^]]*')
 echo Created visual challenge based site-key $V2KEY
-TEST2KEY=$(gcloud recaptcha keys create --display-name=heroes-test2-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
+TEST2KEY=$(gcloud recaptcha keys create --display-name=heroes-test2-site-key --testing-score=0.2 --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
 echo Created test site-key with a score of 0.2 $TEST2KEY
-TEST8KEY=$(gcloud recaptcha keys create --display-name=heroes-test8-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
+TEST8KEY=$(gcloud recaptcha keys create --display-name=heroes-test8-site-key --testing-score=0.8 --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
 echo Created test site-key with a score of 0.8 $TEST8KEY
 EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key --express 2>&1 | grep -Po '\[\K[^]]*')
 echo Created express site-key $EXPRESSKEY
