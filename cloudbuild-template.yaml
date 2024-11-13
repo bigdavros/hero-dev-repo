@@ -22,7 +22,7 @@ steps:
     - run
     - services
     - update
-    - hero-service
+    - recaptcha-demo-service-SHORTCOMMIT
     - '--platform=managed'
     - >-
       --image=REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo-SHORTCOMMIT/recaptcha-heroes-demo-image:COMMITID

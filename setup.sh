@@ -156,5 +156,7 @@ echo gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:
 
 echo ""
 echo gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
-
+echo "Preparing environment for deployment..."
+sleep 90
+gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
 echo $0 "done."
