@@ -92,34 +92,9 @@ done
 COMMITID=$(git log --format="%H" -n 1)
 SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
-#recaptcha-heroes-compute-e78f7@hero-dev-dlenehan.iam.gserviceaccount.com
+
 gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
   --display-name "reCAPTCHA Heroes Compute Service Account"
-
-gcloud services enable recaptchaenterprise.googleapis.com \
-    compute.googleapis.com \
-    storage.googleapis.com \
-
-#gcloud compute project-info describe --project $GOOGLE_CLOUD_PROJECT
-
-LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
-
-APIKEY=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.keyString' | cut -d"\"" -f2)
-echo Created an API key for use by reCAPTCHA Enterprise
-V3KEY=$(gcloud recaptcha keys create --display-name=heroes-score-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
-echo Created score based site-key $V3KEY
-V2KEY=$(gcloud recaptcha keys create --display-name=heroes-checkbox-site-key --web --allow-all-domains --integration-type=checkbox 2>&1 | grep -Po '\[\K[^]]*')
-echo Created visual challenge based site-key $V2KEY
-TEST2KEY=$(gcloud recaptcha keys create --display-name=heroes-test2-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
-echo Created test site-key with a score of 0.2 $TEST2KEY
-TEST8KEY=$(gcloud recaptcha keys create --display-name=heroes-test8-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
-echo Created test site-key with a score of 0.8 $TEST8KEY
-EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key --express 2>&1 | grep -Po '\[\K[^]]*')
-echo Created express site-key $EXPRESSKEY
-
-sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
-
-gcloud storage buckets create gs://$LOG_BUCKET
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$SERVICE_ACCOUNT \
@@ -134,6 +109,29 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --role='roles/storage.objectUser' \
     --role='roles/run.admin' 
 
+gcloud services enable recaptchaenterprise.googleapis.com \
+    compute.googleapis.com \
+    storage.googleapis.com \
+
+APIKEY=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.keyString' | cut -d"\"" -f2)
+echo Created an API key for use by reCAPTCHA Enterprise
+V3KEY=$(gcloud recaptcha keys create --display-name=heroes-score-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
+echo Created score based site-key $V3KEY
+V2KEY=$(gcloud recaptcha keys create --display-name=heroes-checkbox-site-key --web --allow-all-domains --integration-type=checkbox 2>&1 | grep -Po '\[\K[^]]*')
+echo Created visual challenge based site-key $V2KEY
+TEST2KEY=$(gcloud recaptcha keys create --display-name=heroes-test2-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
+echo Created test site-key with a score of 0.2 $TEST2KEY
+TEST8KEY=$(gcloud recaptcha keys create --display-name=heroes-test8-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
+echo Created test site-key with a score of 0.8 $TEST8KEY
+EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key --express 2>&1 | grep -Po '\[\K[^]]*')
+echo Created express site-key $EXPRESSKEY
+
+echo "Creating cloudbuild.yaml"
+sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
+
+LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
+echo "Creating log bucket gs://$LOG_BUCKET"
+gcloud storage buckets create gs://$LOG_BUCKET
 
 gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT \
     --role='roles/storage.admin' \
@@ -142,11 +140,10 @@ gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceA
     --role='roles/storage.objectAdmin' \
     --role='roles/storage.objectUser' 
 
+echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
-
-
 
 cat cloudbuild.yaml
 
@@ -156,6 +153,6 @@ echo gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:
 echo ""
 echo gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
 echo "Preparing environment for deployment..."
-sleep 90
+
 gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
 echo $0 "done."
