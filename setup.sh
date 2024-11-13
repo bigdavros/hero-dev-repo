@@ -124,7 +124,7 @@ gcloud storage buckets create gs://$LOG_BUCKET
 
 gcloud projects add-iam-policy-binding $PROJECT_NUMBER \
     --member=serviceAccount:$SERVICE_ACCOUNT \
-    --role='roles/cloudbuild.builds.builder' \    
+    --role='roles/cloudbuild.builds.builder' \   
     --role='roles/cloudbuild.serviceAgent' \
     --role='roles/cloudbuild.builds.editor' \
     --role='roles/run.developer' \
