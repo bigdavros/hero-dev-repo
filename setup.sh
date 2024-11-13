@@ -122,7 +122,7 @@ sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVIC
 
 gcloud storage buckets create gs://$LOG_BUCKET
 
-gcloud projects add-iam-policy-binding $PROJECT_NUMBER \
+gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$SERVICE_ACCOUNT \
     --role='roles/cloudbuild.builds.builder' \
     --role='roles/cloudbuild.serviceAgent' \
@@ -151,6 +151,10 @@ gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
 
 
 cat cloudbuild.yaml
+
+echo ""
+echo gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role=roles/owner
+
 echo ""
 echo gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
 
