@@ -129,7 +129,10 @@ echo "Creating cloudbuild.yaml"
 sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
 
-echo gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin' --role='roles/logging.logWriter' 
+echo gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin' 
+
+echo gcloud storage buckets add-iam-policy-binding gs://hero-dev-dlenehan_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
+gcloud storage buckets add-iam-policy-binding gs://hero-dev-dlenehan_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
 
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
