@@ -132,9 +132,13 @@ gcloud projects add-iam-policy-binding $PROJECT_NUMBER \
     --role='roles/storage.admin' \
     --role='roles/run.admin' 
 
+gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT --role=roles/storage.admin
+
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
+
+
 
 cat cloudbuild.yaml
 echo gcloud builds submit --region=$REGION --config cloudbuild.yaml
