@@ -93,18 +93,9 @@ COMMITID=$(git log --format="%H" -n 1)
 SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 
+echo "Creating service account $SERVICE_ACCOUNT"
 gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
   --display-name "reCAPTCHA Heroes Compute Service Account"
-
-#gcloud projects add-iam-policy-binding $PROJECT_ID \
-#    --member=serviceAccount:$SERVICE_ACCOUNT \
-#    --role='roles/artifactregistry.writer' \
-#    --role='roles/cloudbuild.integrations.owner' \
-#    --role='roles/cloudbuild.builds.builder' \
-#    --role='roles/logging.logWriter' \
-#    --role='roles/run.developer' \
-#    --role='roles/iam.serviceAccountUser' \
-#    --role='roles/storage.objectUser'
 
 echo "Granting permissions to $SERVICE_ACCOUNT"
 
@@ -117,6 +108,8 @@ declare -a roles=(
    "roles/run.developer"
    "roles/storage.objectUser"
 )
+
+sleep 5
 
 for role in "${roles[@]}"
 do
@@ -154,25 +147,16 @@ gcloud storage buckets create gs://$LOG_BUCKET
 echo "Creating cloudbuild.yaml"
 sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
+#gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin' 
 
-gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin' 
-
-echo gcloud storage buckets add-iam-policy-binding gs://${PROJECT_ID}_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
-gcloud storage buckets add-iam-policy-binding gs://${PROJECT_ID}_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
+#echo gcloud storage buckets add-iam-policy-binding gs://${PROJECT_ID}_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
+#gcloud storage buckets add-iam-policy-binding gs://${PROJECT_ID}_cloudbuild --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin'
 
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
 
-cat cloudbuild.yaml
-
-echo ""
-echo gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role=roles/owner
-
-echo ""
-echo gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
-echo "Preparing environment for deployment..."
-
-gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
+echo "Starting build"
+gcloud builds submit --region=$REGION --config cloudbuild.yaml 
 echo $0 "done."
