@@ -137,12 +137,6 @@ public class Api extends HttpServlet {
         return reply;
     }
 
-    private Reply expressAssessment(){
-        Reply reply = new Reply();
-        reply.setData("expressAssessment");
-        return reply;
-    }
-
     private Reply createAssessment(String projectID, Event event)
     throws Exception {
         Reply reply = new Reply();        
