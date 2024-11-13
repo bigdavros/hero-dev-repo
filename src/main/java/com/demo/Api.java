@@ -284,32 +284,13 @@ public class Api extends HttpServlet {
                     else if(type.equals("express")){
                         String ipAddr = "8.8.8.8"; // Google DNS
                         String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"; // Chrome on Windows
+                        String requestedUri = "https://auth.example.com/login";
                         if(subType.equals("bad")){
                             ipAddr = "171.25.193.25"; // Tor exit node
                             userAgent = "Mozilla/5.0 (X11; Kali Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"; // Kali linux
                         }
-                        /*
-                         * 
-                         * 
-                            {
-                            "event": {
-                                "siteKey": "EXPRESS_KEY",
-                                "express": true,
-                                "userIpAddress": "USER_IP_ADDRESS",
-                                "headers": ["HEADER_INFO"],
-                                "ja3": "JA3_FINGERPRINT",
-                                "requestedUri": "URI_NAME",
-                                "userAgent": "USER_AGENT",
-                                "user_info": {
-                                "account_id": "ACCOUNT_ID"
-                                }
-                            }
-                            }
-
-                         * 
-                         */
                         try{
-                            Event event = Event.newBuilder().setSiteKey(expressKey).setExpress(true).setUserIpAddress(ipAddr).setUserAgent(userAgent).build();
+                            Event event = Event.newBuilder().setSiteKey(expressKey).setExpress(true).setUserIpAddress(ipAddr).setUserAgent(userAgent).setRequestedUri(requestedUri).build();
                             Reply reply = createAssessment(projectId,event);
                             // For a standard assessment, to make things cleaner in the demo, we want to remove the account defender enum.
                             // It might not be present depending on the project state, so we check first before removing it.
