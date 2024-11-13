@@ -98,15 +98,9 @@ gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
 
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member=serviceAccount:$SERVICE_ACCOUNT \
-    --role='roles/cloudbuild.builds.builder' \
-    --role='roles/cloudbuild.serviceAgent' \
-    --role='roles/cloudbuild.builds.editor' \
-    --role='roles/run.developer' \
-    --role='roles/run.serviceAgent' \
+    --role='roles/cloudbuild.integrations.owner' \
     --role='roles/logging.logWriter' \
     --role='roles/storage.admin' \
-    --role='roles/storage.objectAdmin' \
-    --role='roles/storage.objectUser' \
     --role='roles/run.admin' 
 
 gcloud services enable recaptchaenterprise.googleapis.com \
@@ -126,19 +120,16 @@ echo Created test site-key with a score of 0.8 $TEST8KEY
 EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key --express 2>&1 | grep -Po '\[\K[^]]*')
 echo Created express site-key $EXPRESSKEY
 
-echo "Creating cloudbuild.yaml"
-sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
-
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
+
 echo "Creating log bucket gs://$LOG_BUCKET"
 gcloud storage buckets create gs://$LOG_BUCKET
 
-gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT \
-    --role='roles/storage.admin' \
-    --role='roles/logging.logWriter' \
-    --role='roles/storage.admin' \
-    --role='roles/storage.objectAdmin' \
-    --role='roles/storage.objectUser' 
+echo "Creating cloudbuild.yaml"
+sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
+
+
+echo gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT --role='roles/storage.admin' --role='roles/logging.logWriter' 
 
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
