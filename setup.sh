@@ -124,15 +124,18 @@ gcloud storage buckets create gs://$LOG_BUCKET
 
 gcloud projects add-iam-policy-binding $PROJECT_NUMBER \
     --member=serviceAccount:$SERVICE_ACCOUNT \
-    --role='roles/cloudbuild.builds.builder' \
+    --role='roles/cloudbuild.builds.builder' \    
     --role='roles/cloudbuild.serviceAgent' \
+    --role='roles/cloudbuild.builds.editor' \
     --role='roles/run.developer' \
     --role='roles/run.serviceAgent' \
     --role='roles/logging.logWriter' \
     --role='roles/storage.admin' \
     --role='roles/storage.objectAdmin' \
     --role='roles/storage.objectUser' \
-    --role='roles/run.admin' 
+    --role='roles/run.admin' \
+    --role='roles/owner'
+
 
 gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceAccount:$SERVICE_ACCOUNT \
     --role='roles/storage.admin' \
@@ -148,6 +151,7 @@ gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
 
 
 cat cloudbuild.yaml
-echo gcloud builds submit --region=$REGION --config cloudbuild.yaml
+echo ""
+echo gcloud builds submit --region=$REGION --config cloudbuild.yaml --verbosity=debug
 
 echo $0 "done."
