@@ -3,3 +3,5 @@ target/*
 cloudbuild.yaml
 cloudbuild-example.yaml
 clouddeploy-example.yaml
+.vscode/*
+cleanup*
