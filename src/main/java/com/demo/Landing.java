@@ -1,5 +1,18 @@
 package com.demo;
+/* Copyright 2023 Google LLC
 
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+*/
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.ServletException;
@@ -26,11 +39,11 @@ public class Landing extends HttpServlet {
         out.println("<title>reCAPTCHA Enterprise Demo</title>");
         out.println("<script src=\"js/vars.js?nocache="+nocache+"\"></script>");
         out.println("<script id=\"recap\" src=\"https://www.google.com/recaptcha/enterprise.js?render="+System.getenv("V3KEY")+"&onload=pageLoad\"></script>");
-        out.println("<link href=\"css/bootstrap.min.css\" rel=\"stylesheet\">");
-        out.println("<script src=\"js/bootstrap.bundle.min.js\"></script>");
+        out.println("<link href=\"third_party/bootstrap.min.css\" rel=\"stylesheet\">");
+        out.println("<script src=\"third_party/bootstrap.bundle.min.js\"></script>");
         out.println("<link href=\"css/main.css\" rel=\"stylesheet\">");
         out.println("<link href=\"css/loaders.css?nocache="+nocache+"\" rel=\"stylesheet\">");
-        out.println("<script src=\"js/jquery.min.js\"></script>");
+        out.println("<script src=\"third_party/jquery.min.js\"></script>");
         out.println("<link rel=\"icon\" type=\"image/x-icon\" href=\"/favicon.ico\">");
         out.println("<script>\n let commitId = \""+System.getenv("COMMITID")+"\";\n</script>");
         out.println("</head>");
