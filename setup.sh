@@ -142,7 +142,7 @@ gcloud storage buckets add-iam-policy-binding gs://$LOG_BUCKET --member=serviceA
     --role='roles/logging.logWriter' \
     --role='roles/storage.admin' \
     --role='roles/storage.objectAdmin' \
-    --role='roles/storage.objectUser' \
+    --role='roles/storage.objectUser' 
 
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
