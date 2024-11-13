@@ -41,7 +41,6 @@ WORKDIR /opt/tomcat
 RUN chgrp -R tomcat /opt/tomcat
 RUN chown -R tomcat webapps/ work/ temp/ logs/
 
-RUN echo "yup4"
 WORKDIR /
 RUN rm -rf /opt/tomcat/webapps/ROOT
 RUN git clone https://github.com/bigdavros/hero-dev-repo

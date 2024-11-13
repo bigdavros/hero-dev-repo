@@ -49,6 +49,7 @@ public class Api extends HttpServlet {
     private String test2key = System.getenv("TEST2KEY");
     private String test8key = System.getenv("TEST8KEY");
     private String projectId = System.getenv("PROJECTID"); 
+    private String expressKey = System.getenv("EXPRESSKEY"); 
 
     private RecaptchaEnterpriseServiceSettings settings(){
         RecaptchaEnterpriseServiceSettings config;
@@ -120,6 +121,12 @@ public class Api extends HttpServlet {
         Reply reply = new Reply();
         reply.setData("error");
         reply.setResult(msg);
+        return reply;
+    }
+
+    private Reply expressAssessment(){
+        Reply reply = new Reply();
+        reply.setData("expressAssessment");
         return reply;
     }
 
@@ -274,6 +281,50 @@ public class Api extends HttpServlet {
                             }
                         }                        
                     }
+                    else if(type.equals("express")){
+                        String ipAddr = "8.8.8.8"; // Google DNS
+                        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"; // Chrome on Windows
+                        if(subType.equals("bad")){
+                            ipAddr = "171.25.193.25"; // Tor exit node
+                            userAgent = "Mozilla/5.0 (X11; Kali Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"; // Kali linux
+                        }
+                        /*
+                         * 
+                         * 
+                            {
+                            "event": {
+                                "siteKey": "EXPRESS_KEY",
+                                "express": true,
+                                "userIpAddress": "USER_IP_ADDRESS",
+                                "headers": ["HEADER_INFO"],
+                                "ja3": "JA3_FINGERPRINT",
+                                "requestedUri": "URI_NAME",
+                                "userAgent": "USER_AGENT",
+                                "user_info": {
+                                "account_id": "ACCOUNT_ID"
+                                }
+                            }
+                            }
+
+                         * 
+                         */
+                        try{
+                            Event event = Event.newBuilder().setSiteKey(expressKey).setExpress(true).setUserIpAddress(ipAddr).setUserAgent(userAgent).build();
+                            Reply reply = createAssessment(projectId,event);
+                            // For a standard assessment, to make things cleaner in the demo, we want to remove the account defender enum.
+                            // It might not be present depending on the project state, so we check first before removing it.
+                            // The reply string will be base64 encoded, so you need to decode, do the test, then remove
+                            String adReplyCheck = new String(Base64.getDecoder().decode(reply.getResult()),"UTF-8");
+                            if(adReplyCheck.indexOf("account_defender_assessment")>-1){
+                                reply.setResult(adReplyCheck.substring(0,adReplyCheck.indexOf("account_defender_assessment")));
+                            }
+                            out.println(reply.asJSON());
+                        }
+                        catch(Exception e){
+                            throw new IOException("Error creating Reply object in normal assessment: "+e);
+                        }
+                    }
+
                     else{
                         out.println(error("Nothing implemented for type '"+type+"'!").asJSON());
                     }
