@@ -7,7 +7,7 @@ steps:
     --build-arg projectId=PROJECT_NUMBER --build-arg comitid=COMMITID --build-arg apikey=APIKEY 
     --build-arg v3key=V3KEY --build-arg v2key=V2KEY 
     --build-arg test2key=TEST2KEY --build-arg test8key=TEST8KEY 
-    --build-arg expresskey=EXPRESSKEY --build-arg iapbackend=value . -f Dockerfile
+    --build-arg expresskey=EXPRESSKEY . -f Dockerfile
   automapSubstitutions: true
   id: Build
   entrypoint: bash

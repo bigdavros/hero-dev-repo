@@ -21,7 +21,6 @@ ARG v2key=0
 ARG test2key=0
 ARG test8key=0
 ARG expresskey=0
-ARG iapbackend=0
 
 RUN echo "#!/usr/bin/env bash" > /newcatalina.sh
 RUN echo ${projectId} | awk '{print "export PROJECTID="$0}'>> /newcatalina.sh
@@ -32,7 +31,6 @@ RUN echo ${v2key} | awk '{print "export V2KEY="$0}'>> /newcatalina.sh
 RUN echo ${test2key} | awk '{print "export TEST2KEY="$0}'>> /newcatalina.sh
 RUN echo ${test8key} | awk '{print "export TEST8KEY="$0}'>> /newcatalina.sh
 RUN echo ${expresskey} | awk '{print "export EXPRESSKEY="$0}'>> /newcatalina.sh
-RUN echo ${iapbackend} | awk '{print "export IAPBACKEND="$0}'>> /newcatalina.sh
 RUN export MYDATE=$(date +"%d-%b-%Y_%H:%M:%S") && echo export LASTBUILD="\"$MYDATE\"" >> /newcatalina.sh
 RUN echo "" >> /newcatalina.sh
 
