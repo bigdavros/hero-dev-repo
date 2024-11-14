@@ -186,10 +186,8 @@ EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key
 echo Created express site-key $EXPRESSKEY
 echo "gcloud recaptcha keys delete $EXPRESSKEY --quiet" >> cleanup-$SHORTCOMMIT.sh
 
-
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
-
-echo "gcloud storage rm --recursive gs://$LOG_BUCKET" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud storage rm --recursive gs://$LOG_BUCKET --quiet" >> cleanup-$SHORTCOMMIT.sh
 echo "Creating log bucket gs://$LOG_BUCKET"
 gcloud storage buckets create gs://$LOG_BUCKET
 
@@ -202,6 +200,8 @@ gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
 
+
+echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT" >> cleanup-$SHORTCOMMIT.sh
 echo "Starting build"
 gcloud builds submit --region=$REGION --config cloudbuild.yaml 
 
