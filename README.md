@@ -40,14 +40,9 @@ Estimated deployment time: 4 min 23 sec
     <img alt="Open in Cloud Shell" src="https://gstatic.com/cloudssh/images/open-btn.svg">
 </a>
 
-2. Run the prerequisites script to enable APIs and set Cloud Build permissions.
+2. Run the script to deploy the demo. You will be prompted for variables by the script.
 ```
-sh prereq.sh
-```
-
-3. Run the Cloud Build Job
-```
-gcloud builds submit . --config build/cloudbuild.yaml
+sh deploy.sh
 ```
 ## Testing the architecture
 

@@ -217,3 +217,4 @@ case "$var_confirm" in
 esac
 
 echo To connect to the demo use: gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION
+echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run.sh
