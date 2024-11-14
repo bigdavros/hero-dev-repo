@@ -166,10 +166,10 @@ gcloud services enable recaptchaenterprise.googleapis.com \
     compute.googleapis.com \
     storage.googleapis.com \
 
-
-APIKEY=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.keyString' | cut -d"\"" -f2)
+APIKEYNAME=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.name' | cut -d'"' -f2)
+echo "gcloud services api-keys delete $APIKEYNAME --quiet" >> cleanup-$SHORTCOMMIT.sh
+APIKEY=$(gcloud services api-keys get-key-string $APIKEYNAME | cut -d" " -f2)
 echo Created an API key for use by reCAPTCHA Enterprise
-echo "gcloud recaptcha keys delete $APIKEY --quiet" >> cleanup-$SHORTCOMMIT.sh
 V3KEY=$(gcloud recaptcha keys create --display-name=heroes-score-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
 echo Created score based site-key $V3KEY
 echo "gcloud recaptcha keys delete $V3KEY --quiet" >> cleanup-$SHORTCOMMIT.sh
