@@ -122,12 +122,17 @@ while : ; do
             ;;
     esac
 done
+
+# check if cleanup.sh already exists from prior run, rename it if it does
+[ -f cleanup.sh ] && mv cleanup.sh cleanup-old-$(date +%s).sh
+
+
 COMMITID=$(git log --format="%H" -n 1)
 SHORTCOMMIT=${COMMITID: -5}
 
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 
-echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet" >> cleanup.sh
 
 echo "Creating service account $SERVICE_ACCOUNT"
 gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
@@ -153,7 +158,14 @@ sleep 5
 for role in "${roles[@]}"
 do
     echo -n "."
-    gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled
+    if gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled ; then
+        echo "."
+    else
+        echo "\nRetrying"
+        gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled
+        echo "Granting permissions to $SERVICE_ACCOUNT"
+    fi
+    
     echo -n "."
     sleep 1
 done
@@ -167,41 +179,41 @@ gcloud services enable recaptchaenterprise.googleapis.com \
     storage.googleapis.com \
 
 APIKEYNAME=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.name' | cut -d'"' -f2)
-echo "gcloud services api-keys delete $APIKEYNAME --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud services api-keys delete $APIKEYNAME --quiet" >> cleanup.sh
 APIKEY=$(gcloud services api-keys get-key-string $APIKEYNAME | cut -d" " -f2)
 echo Created an API key for use by reCAPTCHA Enterprise
 V3KEY=$(gcloud recaptcha keys create --display-name=heroes-score-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
 echo Created score based site-key $V3KEY
-echo "gcloud recaptcha keys delete $V3KEY --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud recaptcha keys delete $V3KEY --quiet" >> cleanup.sh
 V2KEY=$(gcloud recaptcha keys create --display-name=heroes-checkbox-site-key --web --allow-all-domains --integration-type=checkbox 2>&1 | grep -Po '\[\K[^]]*')
 echo Created visual challenge based site-key $V2KEY
-echo "gcloud recaptcha keys delete $V2KEY --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud recaptcha keys delete $V2KEY --quiet" >> cleanup.sh
 TEST2KEY=$(gcloud recaptcha keys create --display-name=heroes-test2-site-key --testing-score=0.2 --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
 echo Created test site-key with a score of 0.2 $TEST2KEY
-echo "gcloud recaptcha keys delete $TEST2KEY --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud recaptcha keys delete $TEST2KEY --quiet" >> cleanup.sh
 TEST8KEY=$(gcloud recaptcha keys create --display-name=heroes-test8-site-key --testing-score=0.8 --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
 echo Created test site-key with a score of 0.8 $TEST8KEY
-echo "gcloud recaptcha keys delete $TEST8KEY --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud recaptcha keys delete $TEST8KEY --quiet" >> cleanup.sh
 EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key --express 2>&1 | grep -Po '\[\K[^]]*')
 echo Created express site-key $EXPRESSKEY
-echo "gcloud recaptcha keys delete $EXPRESSKEY --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud recaptcha keys delete $EXPRESSKEY --quiet" >> cleanup.sh
 
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
-echo "gcloud storage rm --recursive gs://$LOG_BUCKET --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud storage rm --recursive gs://$LOG_BUCKET --quiet" >> cleanup.sh
 echo "Creating log bucket gs://$LOG_BUCKET"
 gcloud storage buckets create gs://$LOG_BUCKET
 
 echo "Creating cloudbuild.yaml"
 sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
-echo "gcloud artifacts repositories delete recaptcha-heroes-docker-repo-$SHORTCOMMIT --quiet" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud artifacts repositories delete recaptcha-heroes-docker-repo-$SHORTCOMMIT --quiet" >> cleanup.sh
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
 
 
-echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT" >> cleanup-$SHORTCOMMIT.sh
+echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT" >> cleanup.sh
 echo "Starting build"
 gcloud builds submit --region=$REGION --config cloudbuild.yaml 
 
@@ -217,4 +229,4 @@ case "$var_confirm" in
 esac
 
 echo To connect to the demo use: gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION
-echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run.sh
+echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run-$SHORTCOMMIT.sh
