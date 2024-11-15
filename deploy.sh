@@ -64,6 +64,10 @@ while : ; do
     esac
 done
 
+gcloud services enable recaptchaenterprise.googleapis.com \
+    compute.googleapis.com \
+    storage.googleapis.com 
+
 export REGION=$(gcloud config get-value compute/zone)
 regions=()
 num_regions=0
@@ -173,10 +177,6 @@ echo ""
 
 echo "Permissions added:"
 gcloud projects get-iam-policy $PROJECT_ID --flatten="bindings[].members" --format='table(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT" | grep "roles"
-
-gcloud services enable recaptchaenterprise.googleapis.com \
-    compute.googleapis.com \
-    storage.googleapis.com \
 
 APIKEYNAME=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.name' | cut -d'"' -f2)
 echo "gcloud services api-keys delete $APIKEYNAME --quiet" >> cleanup.sh
