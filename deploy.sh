@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+START=$(date +%s)
 select_project () {
     num_projects=0
 
@@ -140,7 +140,7 @@ while : ; do
 done
 
 # check if cleanup.sh already exists from prior run, rename it if it does
-[ -f cleanup.sh ] && mv cleanup.sh cleanup-old-$(date +%s).sh
+[ -f cleanup.sh ] && mv cleanup.sh cleanup-old-$START.sh
 
 
 COMMITID=$(git log --format="%H" -n 1)
@@ -175,9 +175,9 @@ for role in "${roles[@]}"
 do
     echo -n "."
     if gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled ; then
-        echo "."
+        echo -n "."
     else
-        echo "\nRetrying"
+        echo "\nRetrying\n"
         gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled
         echo "Granting permissions to $SERVICE_ACCOUNT"
     fi
@@ -229,6 +229,10 @@ echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT" >> cleanup
 echo "Starting build"
 gcloud builds submit --region=$REGION --config cloudbuild.yaml 
 
+echo - "Task finished in "
+seconds=$(($START-$(date +%s))) 
+date -ud "@$seconds" +"$(( $seconds/3600/24 )) days %H hours %M minutes %S seconds"
+
 echo -n "Would you like to connect to the demo now? Y/n: "
 read var_confirm
 case "$var_confirm" in
@@ -241,4 +245,7 @@ case "$var_confirm" in
 esac
 
 echo To connect to the demo use: gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION
-echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run-$SHORTCOMMIT.sh
+# check if run.sh already exists from prior run, rename it if it does
+[ -f run.sh ] && mv run.sh run-old-$START.sh
+echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run.sh
+
