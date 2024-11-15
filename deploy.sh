@@ -64,9 +64,21 @@ while : ; do
     esac
 done
 
-gcloud services enable recaptchaenterprise.googleapis.com \
+echo "Checking and enabling services in project $PROJECT_ID: "
+echo " - reCAPTCHA"
+echo " - Compute"
+echo " - Storage"
+echo " - Artifact Registry"
+echo " - Cloud Build"
+echo " - Cloud Run"
+
+gcloud services enable \
+    recaptchaenterprise.googleapis.com \
     compute.googleapis.com \
-    storage.googleapis.com 
+    storage.googleapis.com \
+    artifactregistry.googleapis.com \
+    cloudbuild.googleapis.com \
+    run.googleapis.com
 
 export REGION=$(gcloud config get-value compute/zone)
 regions=()
