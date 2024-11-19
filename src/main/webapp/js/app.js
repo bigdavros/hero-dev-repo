@@ -527,7 +527,7 @@ function showAdPage(type){
     }
     else if(type=="off"){
         recreateInnerContentWireframe("Enable Account Defender");
-        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">Account defender has not been enabled. This feature requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings.</div>');
+        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">This part of the demo requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings. After enabling, it may take up to 15 minutes for the change to be implemented.</div>');
     }
     else{
         recreateInnerContentWireframe("Normal Interaction");
@@ -640,17 +640,27 @@ function showPLDPage(type){
 function makePLDPage(){
     deselectAllHeaders();
     document.getElementById('nav_pld').classList.add('active');
-    sidebarItems = [
-        ["nav_pld_clear","clear form", "javascript:showPLDPage('clear')"],
-        ["nav_pld_leak","leakedusername | leakedpassword", "javascript:showPLDPage('leak')"],
-        ["nav_pld_test","test | password", "javascript:showPLDPage('test')"],
-        ["nav_pld_admin","admin | password", "javascript:showPLDPage('admin')"],
-        ["nav_pld_scott","scott | tiger", "javascript:showPLDPage('scott')"]
-    ];
-    makeSideBar(sidebarItems);
-    recreateInnerContentWireframe("Password Leak Detection");
-    putPLDDemoForm();
-    showPLDPage('clear');
+    if(adStatus){
+        sidebarItems = [
+            ["nav_pld_clear","clear form", "javascript:showPLDPage('clear')"],
+            ["nav_pld_leak","leakedusername | leakedpassword", "javascript:showPLDPage('leak')"],
+            ["nav_pld_test","test | password", "javascript:showPLDPage('test')"],
+            ["nav_pld_admin","admin | password", "javascript:showPLDPage('admin')"],
+            ["nav_pld_scott","scott | tiger", "javascript:showPLDPage('scott')"]
+        ];
+        makeSideBar(sidebarItems);
+        recreateInnerContentWireframe("Password Leak Detection");
+        putPLDDemoForm();
+        showPLDPage('clear');
+    }
+    else{
+        sidebarItems= [["nav_pld_off","Disabled", "javascript:showAdPage('off')"]];    
+        makeSideBar(sidebarItems);
+        recreateInnerContentWireframe("Enable Account Defender");
+        inactiveAllSidebar(sidebarItems);
+        document.getElementById('nav_pld_off').classList.add('active');
+        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">This part of the demo requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings. After enabling, it may take up to 15 minutes for the change to be implemented.</div>');
+    }
 }
 
 /*
