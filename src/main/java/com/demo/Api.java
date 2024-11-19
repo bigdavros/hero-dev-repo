@@ -361,10 +361,10 @@ public class Api extends HttpServlet {
                     // This is to check if AD has been enabled
                     boolean adEnabled = isAdEnabled(projectId);
                     if(adEnabled){
-                        out.println("true");
+                        out.print("1");
                     }
                     else{
-                        out.println("false");
+                        out.print("0");
                     }
                 }
                 else{
