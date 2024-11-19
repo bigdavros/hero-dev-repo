@@ -233,7 +233,7 @@ function makeLandingPage(){
     <section class="pb-4">
         <div class="bg-white border rounded-5">
             <section class="w-100 p-4 d-flex justify-content-center pb-4">
-                <p>All demo's built from documentation found at: <a href="https://cloud.google.com/recaptcha-enterprise/docs/how-to">https://cloud.google.com/recaptcha-enterprise/docs/how-to</a>.<br><br>Google staff can request access to this demo application from its creator <a href="https://moma.corp.google.com/person/dlenehan">dlenehan@</a>.</p>
+                <p>All demo's built from documentation found at: <a href="https://cloud.google.com/recaptcha-enterprise/docs/how-to">https://cloud.google.com/recaptcha-enterprise/docs/how-to</a>.</p>
             </section>
         </div>
     </section>

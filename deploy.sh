@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Make sure the gcloud client is initialised
-if ! gcloud auth list ; then echo "Please run: gcloud init" ;exit 1; fi
-
 # This variable is used to rename files that may otherwise be overwritten 
 START=$(date +%s)
 
@@ -34,18 +31,25 @@ select_project () {
             echo "[$count]" ${project_list[$count]};
             count=$(expr $count + 1);
         done
-        echo -n "Please select a project: "
-        read var_project
-        # TODO: set the REGION variable based on this answer
-        # include logic to make sure the input makes sense
-        if [ "$num_projects" -gt "$var_project" ]; then
-            export PROJECT_ID="${project_list[$var_project]}"
-            gcloud config set project $PROJECT_ID
-            export PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
-            break
+        # Check there are projects available, if none then prompt users to
+        # investigate then exit
+        if (( ${#a[@]} )); then
+            echo -n "Please select a project: "
+            read var_project
+            # TODO: set the REGION variable based on this answer
+            # include logic to make sure the input makes sense
+            if [ "$num_projects" -gt "$var_project" ]; then
+                export PROJECT_ID="${project_list[$var_project]}"
+                gcloud config set project $PROJECT_ID
+                export PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
+                break
+            else
+                echo "Selection out of range."
+            fi
         else
-            echo "Selection out of range."
-        fi
+            echo "No projects found. Do you need to authenticate this command line session?"
+            exit 1
+        fi        
     done
 }
 
@@ -273,7 +277,7 @@ gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
 
-
+# Add delete service to cleanup
 echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT" >> cleanup.sh
 
 echo "Starting build"
@@ -289,9 +293,8 @@ fi
 rm cloudbuild.yaml
 
 # Stats for nerds
-echo - "Task finished in "
-seconds=$(($START-$(date +%s))) 
-date -ud "@$seconds" +"$(( $seconds/3600/24 )) days %H hours %M minutes %S seconds"
+echo Start $START 
+echo End $(date +%s)
 
 # Offer the user the chance to connect to the demo right now
 echo -n "Would you like to connect to the demo now? Y/n: "
