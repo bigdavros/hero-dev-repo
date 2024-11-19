@@ -11,7 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Make sure the gcloud client is initialised
+if ! gcloud auth list ; then echo "Please run: gcloud init" ;exit 1; fi
+
+# This variable is used to rename files that may otherwise be overwritten 
 START=$(date +%s)
+
+#Project selector
 select_project () {
     num_projects=0
 
@@ -42,6 +49,7 @@ select_project () {
     done
 }
 
+# Check there is a project set
 if [ -z "$GOOGLE_CLOUD_PROJECT" ]
 then
     select_project
@@ -50,6 +58,7 @@ else
     export PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
 fi
 
+# Check the set project is the one the user wants to use
 while : ; do
     echo -n "Deploy solution to project: "$PROJECT_ID" Y/n: "
     read var_confirm
@@ -64,26 +73,36 @@ while : ; do
     esac
 done
 
-echo "Checking and enabling services in project $PROJECT_ID: "
+# Enable the required services
+echo "Checking and enabling services in project $PROJECT_ID, this could take a minute or two."
+
+#This could be one command, but the time to enable all the services can be in the miniutes,
+#so running one at a time gives the user some feedback.
 echo " - reCAPTCHA"
+gcloud services enable recaptchaenterprise.googleapis.com 
+
 echo " - Compute"
+gcloud services enable compute.googleapis.com 
+
 echo " - Storage"
+gcloud services enable storage.googleapis.com 
+
 echo " - Artifact Registry"
+gcloud services enable artifactregistry.googleapis.com 
+
 echo " - Cloud Build"
+gcloud services enable cloudbuild.googleapis.com 
+
 echo " - Cloud Run"
+gcloud services enable run.googleapis.com
 
-gcloud services enable \
-    recaptchaenterprise.googleapis.com \
-    compute.googleapis.com \
-    storage.googleapis.com \
-    artifactregistry.googleapis.com \
-    cloudbuild.googleapis.com \
-    run.googleapis.com
-
+#get the current default region if set
 export REGION=$(gcloud config get-value compute/zone)
 regions=()
 num_regions=0
 
+#Because there could be multiple calls to select_region, we only want to 
+#make a list of regions once (it takes a few seconds to run)
 populate_regions () {
     if [ -z "${regions[0]}" ] 
     then
@@ -94,6 +113,7 @@ populate_regions () {
     fi
 }
 
+#region selector
 select_region () {
     populate_regions
     while : ; do
@@ -119,12 +139,14 @@ select_region () {
 
 echo -n "Checking region: "
 
+#If the region isn't set, go select one
 if [ -z "$REGION" ] 
 then
     echo "Region not set"
     select_region
 fi
 
+#Check the region selected is the one they want to use
 while : ; do
   echo -n "Deploy reCAPTCHA demo to region: "$REGION" Y/n: "
     read var_confirm
@@ -140,22 +162,32 @@ while : ; do
 done
 
 # check if cleanup.sh already exists from prior run, rename it if it does
+# The cleanup script created can be used to nuke everything afterwards
+# It's important that cleanup commands are added before a create command
+# runs, so that if a create command only partially completes then errors 
+# out, then the cleanup will still be there.
 [ -f cleanup.sh ] && mv cleanup.sh cleanup-old-$START.sh
 
-
+#These variables are used in the build process
 COMMITID=$(git log --format="%H" -n 1)
 SHORTCOMMIT=${COMMITID: -5}
 
+#This service account is used instead of the default compute engine S/A
+#This is better practice than adding permissions to the default S/A
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 
+#Add removal of this service account to the cleanup before it's created
 echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet" >> cleanup.sh
 
+# Create S/A
 echo "Creating service account $SERVICE_ACCOUNT"
 gcloud iam service-accounts create recaptcha-heroes-compute-$SHORTCOMMIT \
   --display-name "reCAPTCHA Heroes Compute Service Account"
 
 echo "Granting permissions to $SERVICE_ACCOUNT"
 
+# These are the roles needed to run the build and deploy to cloud run
+# Least privilege applies here. You may alter these permissions as required.
 declare -a roles=(
    "roles/artifactregistry.writer"
    "roles/cloudbuild.builds.builder"
@@ -166,20 +198,33 @@ declare -a roles=(
    "roles/storage.objectUser"
 )
 
+# The dots provide feedback so the user sees progress. On S/A creation it can take a
+# little while for the S/A to be ready for permissions assignments after creation, so
+# we wait 10 seconds
 echo -n "."
 sleep 5
 echo -n "."
 sleep 5
 
+# Add the roles
 for role in "${roles[@]}"
 do
     echo -n "."
+    # If the adding succeeds then move to the next one. If it fails, retry once then
+    # cleanup and quit.
     if gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled ; then
         echo -n "."
     else
         echo "\nRetrying\n"
-        gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled
-        echo "Granting permissions to $SERVICE_ACCOUNT"
+        if gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled ; then
+            echo -n "."
+        else
+            echo "\nFailed to add required permission to $SERVICE_ACCOUNT: $role\n"
+            echo "cleaning up"
+            bash cleanup.sh
+            echo "Please rerun the script to try again"
+            exit 1
+        fi
     fi
     
     echo -n "."
@@ -187,12 +232,14 @@ do
 done
 echo ""
 
-echo "Permissions added:"
-gcloud projects get-iam-policy $PROJECT_ID --flatten="bindings[].members" --format='table(bindings.role)' --filter="bindings.members:$SERVICE_ACCOUNT" | grep "roles"
-
+# Create the API key needed by the demo. It should be restricted to the reCAPTCHA service.
+# Fetch the key name for the cleanup script
 APIKEYNAME=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.name' | cut -d'"' -f2)
 echo "gcloud services api-keys delete $APIKEYNAME --quiet" >> cleanup.sh
+# Then fetch the secret value for use in the script itself
 APIKEY=$(gcloud services api-keys get-key-string $APIKEYNAME | cut -d" " -f2)
+
+# Create the reCAPTCHA keys
 echo Created an API key for use by reCAPTCHA Enterprise
 V3KEY=$(gcloud recaptcha keys create --display-name=heroes-score-site-key --web --allow-all-domains --integration-type=score 2>&1 | grep -Po '\[\K[^]]*')
 echo Created score based site-key $V3KEY
@@ -210,11 +257,13 @@ EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key
 echo Created express site-key $EXPRESSKEY
 echo "gcloud recaptcha keys delete $EXPRESSKEY --quiet" >> cleanup.sh
 
+#Create the logging buckets
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
 echo "gcloud storage rm --recursive gs://$LOG_BUCKET --quiet" >> cleanup.sh
 echo "Creating log bucket gs://$LOG_BUCKET"
 gcloud storage buckets create gs://$LOG_BUCKET
 
+# Create the cloudbuild.yaml. This replaces variables in the template
 echo "Creating cloudbuild.yaml"
 sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
@@ -226,13 +275,25 @@ gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
 
 
 echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT" >> cleanup.sh
-echo "Starting build"
-gcloud builds submit --region=$REGION --config cloudbuild.yaml 
 
+echo "Starting build"
+if ! gcloud builds submit --region=$REGION --config cloudbuild.yaml ; then
+    echo "Build failed"
+    rm cloudbuild.yaml
+    bash cleanup.sh
+    echo "Please rerun the script to try again"
+    exit 1
+fi
+
+# The cloudbuild.yaml file will contain a secret so remove it when done
+rm cloudbuild.yaml
+
+# Stats for nerds
 echo - "Task finished in "
 seconds=$(($START-$(date +%s))) 
 date -ud "@$seconds" +"$(( $seconds/3600/24 )) days %H hours %M minutes %S seconds"
 
+# Offer the user the chance to connect to the demo right now
 echo -n "Would you like to connect to the demo now? Y/n: "
 read var_confirm
 case "$var_confirm" in
@@ -244,8 +305,12 @@ case "$var_confirm" in
         ;;
 esac
 
+# Give the user the command they will need to connect to the demo
 echo To connect to the demo use: gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION
 # check if run.sh already exists from prior run, rename it if it does
 [ -f run.sh ] && mv run.sh run-old-$START.sh
+
+# Make a .sh that will connect in case the user forgets to make note of
+# the connect command.
 echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run.sh
 
