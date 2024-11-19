@@ -50,6 +50,8 @@ import com.google.recaptchaenterprise.v1.AssessmentName;
 import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest.Annotation;
 
 
+import com.google.recaptchaenterprise.v1.RelatedAccountGroupMembership;
+import com.google.recaptchaenterprise.v1.SearchRelatedAccountGroupMembershipsRequest;
 
 /**
  * API Servlet
@@ -63,6 +65,30 @@ public class Api extends HttpServlet {
     private String test8key = System.getenv("TEST8KEY");
     private String projectId = System.getenv("PROJECTID"); 
     private String expressKey = System.getenv("EXPRESSKEY"); 
+
+    // Quickest way to check Account Defender is enabled is to perform a request that is not featured in the demo.
+    // This feature is to find related accounts, which is an advanced feature. For more info see the docs at
+    // https://cloud.google.com/recaptcha/docs/account-query-apis
+    public static boolean isAdEnabled(String projectId) throws IOException {
+        try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create()) {
+            SearchRelatedAccountGroupMembershipsRequest request =
+                SearchRelatedAccountGroupMembershipsRequest.newBuilder()
+                    .setProject(projectId)
+                    .setAccountId("x")
+                    .build();
+            System.out.printf("created builder");
+            for (RelatedAccountGroupMembership groupMembership :
+                client.searchRelatedAccountGroupMemberships(request).iterateAll()) {
+                System.out.println(groupMembership.getName());
+            }
+            System.out.printf("used builder");
+            System.out.printf("Finished searching related account group memberships for %s!");
+        }
+        catch(Exception e){
+            System.out.println("searchRelatedAccountGroupMemberships error: "+e);
+        }
+        return true;
+    }
 
     private RecaptchaEnterpriseServiceSettings settings(){
         RecaptchaEnterpriseServiceSettings config;
@@ -330,6 +356,16 @@ public class Api extends HttpServlet {
                     String base64httpReplyRaw = "SFRUUC8yIDIwMCBccjxicj4KY29udGVudC10eXBlOiBhcHBsaWNhdGlvbi9qc29uOyBjaGFyc2V0PVVURi04XHI8YnI+CnZhcnk6IFgtT3JpZ2luXHI8YnI+CnZhcnk6IFJlZmVyZXJccjxicj4KdmFyeTogT3JpZ2luLEFjY2VwdC1FbmNvZGluZ1xyPGJyPgpkYXRlOiBNb24sIDEzIEZlYiAyMDIzIDEwOjU4OjI2IEdNVFxyPGJyPgpzZXJ2ZXI6IHNjYWZmb2xkaW5nIG9uIEhUVFBTZXJ2ZXIyXHI8YnI+CmNhY2hlLWNvbnRyb2w6IHByaXZhdGVccjxicj4KeC14c3MtcHJvdGVjdGlvbjogMFxyPGJyPgp4LWZyYW1lLW9wdGlvbnM6IFNBTUVPUklHSU5ccjxicj4KeC1jb250ZW50LXR5cGUtb3B0aW9uczogbm9zbmlmZlxyPGJyPgphbHQtc3ZjOiBoMz0iOjQ0MyI7IG1hPTI1OTIwMDAsaDMtMjk9Ijo0NDMiOyBtYT0yNTkyMDAwXHI8YnI+CmFjY2VwdC1yYW5nZXM6IG5vbmVccjxicj4KXHI8YnI+Cnt9PGJyPg==";
                     annotate(jsonObject.getString("assessment_id"));
                     out.println("{\"data\":\""+base64httpRequestBody+"\",\"result\":\""+base64httpReplyRaw+"\"}");                        
+                }
+                else if(jsonObject.has("type") && jsonObject.getString("type").equals("ADcheck")){
+                    // This is to check if AD has been enabled
+                    boolean adEnabled = isAdEnabled(projectId);
+                    if(adEnabled){
+                        out.println("true");
+                    }
+                    else{
+                        out.println("false");
+                    }
                 }
                 else{
                     // if no token, action, type or subtype                    

@@ -815,5 +815,14 @@ function makeSideBar(sidebarItems){
  */
 
 function pageLoad(){
+    let request_json = "{\"type\":\"ADcheck\"}";
+    $.post('api',
+        request_json,
+        function(data, status, xhr) {
+            alert(data);
+            console.log(data);
+        }
+    )
+    .fail(function(jqxhr, settings, ex) { alert('failed, ' + ex); });
     makeHeader();
 }

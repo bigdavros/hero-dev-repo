@@ -332,3 +332,4 @@ echo To connect to the demo use: gcloud run services proxy recaptcha-demo-servic
 # the connect command.
 echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run.sh
 
+echo "To redeploy: gcloud builds submit --region=$REGION --config cloudbuild.yaml"
