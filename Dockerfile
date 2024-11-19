@@ -33,7 +33,6 @@ RUN echo ${test8key} | awk '{print "export TEST8KEY="$0}'>> /newcatalina.sh
 RUN echo ${expresskey} | awk '{print "export EXPRESSKEY="$0}'>> /newcatalina.sh
 RUN export MYDATE=$(date +"%d-%b-%Y_%H:%M:%S") && echo export LASTBUILD="\"$MYDATE\"" >> /newcatalina.sh
 RUN echo "" >> /newcatalina.sh
-RUN cat /newcatalina.sh
 
 # Install Tomcat
 RUN groupadd tomcat
