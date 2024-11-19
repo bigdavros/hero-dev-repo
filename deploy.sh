@@ -33,7 +33,7 @@ select_project () {
         done
         # Check there are projects available, if none then prompt users to
         # investigate then exit
-        if (( ${#a[@]} )); then
+        if ( "$num_projects" -gt "0" ); then
             echo -n "Please select a project: "
             read var_project
             # TODO: set the REGION variable based on this answer
