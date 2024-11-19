@@ -220,6 +220,7 @@ do
         echo -n "."
     else
         echo "\nRetrying\n"
+        sleep 5
         if gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled ; then
             echo -n "."
         else
@@ -271,14 +272,14 @@ gcloud storage buckets create gs://$LOG_BUCKET
 echo "Creating cloudbuild.yaml"
 sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
-echo "gcloud artifacts repositories delete recaptcha-heroes-docker-repo-$SHORTCOMMIT --quiet" >> cleanup.sh
+echo "gcloud artifacts repositories delete recaptcha-heroes-docker-repo-$SHORTCOMMIT --location=$REGION --quiet" >> cleanup.sh
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --repository-format=docker \
     --location=$REGION --description="Docker repository"
 
 # Add delete service to cleanup
-echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT" >> cleanup.sh
+echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT --region=$REGION" >> cleanup.sh
 
 echo "Starting build"
 if ! gcloud builds submit --region=$REGION --config cloudbuild.yaml ; then

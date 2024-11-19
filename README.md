@@ -32,7 +32,7 @@ There are multiple tiers for reCAPTCHA (including a free tier). For more details
 
 ## Deploy the architecture
 
-Estimated deployment time: 4 min 23 sec
+Estimated deployment time: 8 mins
 
 1. Click on Open in Google Cloud Shell button below.
 
@@ -46,9 +46,14 @@ sh deploy.sh
 ```
 ## Accessing the demo
 
-1. The deployment script will create a `run-XXXXX.sh` with the following contents, that will differ depending on your project and region
+1. The deployment script will create a `run.sh` with the following contents, that will differ depending on your project and region
 ```
 gcloud run services proxy recaptcha-demo-service-XXXXX --project PROJECT_ID --region REGION
+```
+
+2. Simply run the script with:
+```
+sh run.sh
 ```
 
 ## Cleaning up your environment
