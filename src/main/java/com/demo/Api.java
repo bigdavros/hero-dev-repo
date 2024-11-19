@@ -83,11 +83,12 @@ public class Api extends HttpServlet {
             }
             System.out.printf("used builder");
             System.out.printf("Finished searching related account group memberships for %s!");
+            return true;
         }
         catch(Exception e){
             System.out.println("searchRelatedAccountGroupMemberships error: "+e);
         }
-        return true;
+        return false;
     }
 
     private RecaptchaEnterpriseServiceSettings settings(){
