@@ -77,12 +77,9 @@ public class Api extends HttpServlet {
                     .setAccountId("x")
                     .build();
             System.out.println("created builder");
-            for (RelatedAccountGroupMembership groupMembership :
-                client.searchRelatedAccountGroupMemberships(request).iterateAll()) {
-                System.out.println("iterating");
-            }
+            client.searchRelatedAccountGroupMemberships(request).toString();
             System.out.println("used builder");
-            System.out.println("Finished searching related account group memberships for %s!");
+            System.out.println("Finished searching related account group memberships");
             return true;
         }
         catch(Exception e){
