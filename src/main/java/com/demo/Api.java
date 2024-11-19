@@ -77,6 +77,7 @@ public class Api extends HttpServlet {
                     .setAccountId("x")
                     .build();
             System.out.println("created builder");
+            
             client.searchRelatedAccountGroupMemberships(request).toString();
             System.out.println("used builder");
             System.out.println("Finished searching related account group memberships");
