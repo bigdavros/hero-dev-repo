@@ -13,6 +13,8 @@
   limitations under the License.
 */
 
+let adStatus=true;
+
 function sendJson(request_ob,handleResponse){
     let request_json = JSON.stringify(request_ob);
     
@@ -523,6 +525,10 @@ function showAdPage(type){
         recreateInnerContentWireframe("Suspicious Account Creation");
         putAdDemoForm(type,"v3_test8");
     }
+    else if(type=="off"){
+        recreateInnerContentWireframe("Enable Account Defender");
+        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">Account defender has not been enabled. This feature requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings.</div>');
+    }
     else{
         recreateInnerContentWireframe("Normal Interaction");
         putAdDemoForm(type,"v3_login");
@@ -537,9 +543,16 @@ function makeAdPage(){
         ["nav_AD_unusual","Unusual", "javascript:showAdPage('unusual')"],
         ["nav_AD_creation","Account Creation", "javascript:showAdPage('creation')"]
     ];
+
     makeSideBar(sidebarItems);
     recreateInnerContentWireframe("Account Defender");
-    showAdPage('normal');
+    if(adStatus){
+        showAdPage('normal');
+    }
+    else{
+        sidebarItems= ["nav_AD_off","Disabled", "javascript:showAdPage('off')"];    
+        showAdPage('off');
+    }
 }
 
 /*
@@ -819,8 +832,8 @@ function pageLoad(){
     $.post('api',
         request_json,
         function(data, status, xhr) {
-            alert(data);
-            console.log(data);
+            adStatus=data;
+            console.log("adStatus: "+adStatus);
         }
     )
     .fail(function(jqxhr, settings, ex) { alert('failed, ' + ex); });
