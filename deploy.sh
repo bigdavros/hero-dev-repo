@@ -292,7 +292,7 @@ echo "gcloud secrets delete recaptcha-heroes-apikey-$SHORTCOMMIT --quiet" >> cle
 echo "Creating secret recaptcha-heroes-apikey-$SHORTCOMMIT"
 echo -n $APIKEY | gcloud secrets create recaptcha-heroes-apikey-$SHORTCOMMIT --replication-policy="automatic" --data-file=-
 echo "Granting permission to read secret recaptcha-heroes-apikey-$SHORTCOMMIT to $SERVICE_ACCOUNT"
-if ! gcloud beta secrets add-iam-policy-binding projects/$PROJECT_NUMBER/secrets/recaptcha-heroes-apikey-$SHORTCOMMIT --member serviceAccount:$SERVICE_ACCOUNT --role roles/secretmanager.secretAccessor; then
+if ! gcloud secrets add-iam-policy-binding projects/$PROJECT_NUMBER/secrets/recaptcha-heroes-apikey-$SHORTCOMMIT --member serviceAccount:$SERVICE_ACCOUNT --role roles/secretmanager.secretAccessor; then
     echo -e "\e[0;31mFailed to grant permission to read secret\e[0m]"
     echo "cleaning up"
     bash cleanup.sh
