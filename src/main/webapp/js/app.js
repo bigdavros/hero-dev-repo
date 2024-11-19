@@ -543,15 +543,16 @@ function makeAdPage(){
         ["nav_AD_unusual","Unusual", "javascript:showAdPage('unusual')"],
         ["nav_AD_creation","Account Creation", "javascript:showAdPage('creation')"]
     ];
-
-    makeSideBar(sidebarItems);
+    
     recreateInnerContentWireframe("Account Defender");
     console.log("adStatus is "+adStatus+". So...");
     if(adStatus){
+        makeSideBar(sidebarItems);
         showAdPage('normal');
     }
     else{
         sidebarItems= ["nav_AD_off","Disabled", "javascript:showAdPage('off')"];    
+        makeSideBar(sidebarItems);
         showAdPage('off');
     }
 }
@@ -833,7 +834,7 @@ function pageLoad(){
     $.post('api',
         request_json,
         function(data, status, xhr) {
-            console.log("adStatus: "+adStatus);
+            console.log("data: "+data);
             if(data=="true"){
                 console.log("adStatus is boolean true ");
                 adStatus=true;
