@@ -69,8 +69,8 @@ public class Api extends HttpServlet {
     // Quickest way to check Account Defender is enabled is to perform a request that is not featured in the demo.
     // This feature is to find related accounts, which is an advanced feature. For more info see the docs at
     // https://cloud.google.com/recaptcha/docs/account-query-apis
-    public static boolean isAdEnabled(String projectId) throws IOException {
-        try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create()) {
+    public boolean isAdEnabled(String projectId) throws IOException {
+        try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings())) {
             SearchRelatedAccountGroupMembershipsRequest request =
                 SearchRelatedAccountGroupMembershipsRequest.newBuilder()
                     .setProject(projectId)
