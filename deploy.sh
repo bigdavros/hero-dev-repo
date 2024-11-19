@@ -47,7 +47,7 @@ select_project () {
                 echo "Selection out of range."
             fi
         else
-            echo "No projects found. Do you need to authenticate this command line session?"
+            echo "\e[0;31mNo projects found. Do you need to authenticate this command line session?\e[0m"
             exit 1
         fi        
     done
