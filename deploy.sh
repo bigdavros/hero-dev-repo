@@ -47,7 +47,7 @@ select_project () {
                 echo "Selection out of range."
             fi
         else
-            echo "\e[0;31mNo projects found. Do you need to authenticate this command line session?\e[0m"
+            echo -e "\e[0;31mNo projects found. Do you need to authenticate this command line session?\e[0m"
             exit 1
         fi        
     done
@@ -224,10 +224,10 @@ do
         if gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled ; then
             echo -n "."
         else
-            echo "\e[0;31m\nFailed to add required permission to $SERVICE_ACCOUNT: $role\n\e[0m"
+            echo -e "\e[0;31m\nFailed to add required permission to $SERVICE_ACCOUNT: $role\n\e[0m"
             echo "cleaning up"
             bash cleanup.sh
-            echo "\e[0;31mPlease rerun the script to try again\e[0m"
+            echo -e "\e[0;31mPlease rerun the script to try again\e[0m"
             exit 1
         fi
     fi
@@ -271,9 +271,9 @@ gcloud storage buckets create gs://$LOG_BUCKET
 echo "gcloud artifacts repositories delete recaptcha-heroes-docker-repo-$SHORTCOMMIT --location=$REGION --quiet" >> cleanup.sh
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
 if ! gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT --repository-format=docker --location=$REGION --description="Docker repository"; then
-    echo "\e[0;31mFailed to create artifact registry repository\e[0m"
+    echo -e "\e[0;31mFailed to create artifact registry repository\e[0m"
     bash cleanup.sh
-    echo "\e[0;31mPlease rerun the script to try again\e[0m"
+    echo -e "\e[0;31mPlease rerun the script to try again\e[0m"
     exit 1
 fi
 
@@ -286,10 +286,10 @@ sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVIC
 
 echo "Starting build"
 if ! gcloud builds submit --region=$REGION --config cloudbuild.yaml ; then
-    echo "\e[0;31mBuild failed \e[0m"
+    echo -e "\e[0;31mBuild failed \e[0m"
     rm cloudbuild.yaml
     bash cleanup.sh
-    echo "\e[0;31mBPlease rerun the script to try again\e[0m"
+    echo -e "\e[0;31mBPlease rerun the script to try again\e[0m"
     exit 1
 fi
 
