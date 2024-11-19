@@ -13,7 +13,7 @@
   limitations under the License.
 */
 
-let adStatus=true;
+let adStatus;
 
 function sendJson(request_ob,handleResponse){
     let request_json = JSON.stringify(request_ob);
@@ -546,6 +546,7 @@ function makeAdPage(){
 
     makeSideBar(sidebarItems);
     recreateInnerContentWireframe("Account Defender");
+    console.log("adStatus is "+adStatus+". So...");
     if(adStatus){
         showAdPage('normal');
     }
@@ -832,16 +833,18 @@ function pageLoad(){
     $.post('api',
         request_json,
         function(data, status, xhr) {
-            adStatus=data;
             console.log("adStatus: "+adStatus);
+            if(data=="true"){
+                console.log("adStatus is boolean true ");
+                adStatus=true;
+            }
+            else{
+                console.log("adStatus is boolean false ");
+                adStatus=false;
+            }
         }
     )
     .fail(function(jqxhr, settings, ex) { alert('failed, ' + ex); });
-    if(adStatus){
-        console.log("adStatus is boolean true ");
-    }
-    else{
-        console.log("adStatus is boolean false ");
-    }
+    
     makeHeader();
 }
