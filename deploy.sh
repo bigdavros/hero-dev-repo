@@ -287,7 +287,7 @@ sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVIC
 # Add the APIKEY to secrets manager
 echo "gcloud secrets delete recaptcha-heroes-apikey-$SHORTCOMMIT --quiet" >> cleanup.sh
 echo "Creating secret recaptcha-heroes-apikey-$SHORTCOMMIT"
-echo -n $APIKEY | gcloud secrets create secret-id recaptcha-heroes-apikey-$SHORTCOMMIT --replication-policy="automatic" --data-file=-
+echo -n $APIKEY | gcloud secrets create recaptcha-heroes-apikey-$SHORTCOMMIT --replication-policy="automatic" --data-file=-
 echo "Granting permission to read secret recaptcha-heroes-apikey-$SHORTCOMMIT to $SERVICE_ACCOUNT"
 if ! gcloud beta secrets add-iam-policy-binding projects/$PROJECT_NUMBER/secrets/recaptcha-heroes-apikey-$SHORTCOMMIT --member serviceAccount:$SERVICE_ACCOUNT --role roles/secretmanager.secretAccessor; then
     echo -e "\e[0;31mFailed to grant permission to read secret\e[0m]"
