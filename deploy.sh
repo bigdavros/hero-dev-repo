@@ -184,7 +184,7 @@ SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 
 #Add removal of this service account to the cleanup before it's created
-echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet > /dev/null 2>&1" >> cleanup.sh
+echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet --no-user-output-enabled > /dev/null 2>&1" >> cleanup.sh
 
 # Create S/A
 echo "Creating service account $SERVICE_ACCOUNT"
@@ -285,7 +285,7 @@ echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT --region=$R
 
 # Create the cloudbuild.yaml. This replaces variables in the template
 echo "Creating cloudbuild.yaml"
-sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
+sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/"  -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
 
 # Add the APIKEY to secrets manager
 echo "gcloud secrets delete recaptcha-heroes-apikey-$SHORTCOMMIT --quiet" >> cleanup.sh

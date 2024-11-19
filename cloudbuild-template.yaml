@@ -4,7 +4,7 @@ steps:
    - '-c'
    - >-
     docker build --no-cache -t REGION-docker.pkg.dev/PROJECT_ID/recaptcha-heroes-docker-repo-SHORTCOMMIT/recaptcha-heroes-demo-image:COMMITID 
-    --build-arg projectId=PROJECT_NUMBER --build-arg comitid=COMMITID --build-arg apikey=$APISECRET 
+    --build-arg projectId=PROJECT_NUMBER --build-arg comitid=COMMITID --build-arg apikey=$$APISECRET 
     --build-arg v3key=V3KEY --build-arg v2key=V2KEY 
     --build-arg test2key=TEST2KEY --build-arg test8key=TEST8KEY 
     --build-arg expresskey=EXPRESSKEY . -f Dockerfile
