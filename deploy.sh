@@ -181,7 +181,7 @@ SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 
 #Add removal of this service account to the cleanup before it's created
-echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet" >> cleanup.sh
+echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet 2>&1 /dev/null" >> cleanup.sh
 
 # Create S/A
 echo "Creating service account $SERVICE_ACCOUNT"
@@ -282,7 +282,19 @@ echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT --region=$R
 
 # Create the cloudbuild.yaml. This replaces variables in the template
 echo "Creating cloudbuild.yaml"
-sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
+sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
+
+# Add the APIKEY to secrets manager
+echo "gcloud secrets delete recaptcha-heroes-apikey-$SHORTCOMMIT --quiet" >> cleanup.sh
+echo "Creating secret recaptcha-heroes-apikey-$SHORTCOMMIT"
+echo -n $APIKEY | gcloud secrets create secret-id recaptcha-heroes-apikey-$SHORTCOMMIT --replication-policy="automatic" --data-file=-
+echo "Granting permission to read secret recaptcha-heroes-apikey-$SHORTCOMMIT to $SERVICE_ACCOUNT"
+if ! gcloud beta secrets add-iam-policy-binding projects/$PROJECT_NUMBER/secrets/recaptcha-heroes-apikey-$SHORTCOMMIT --member serviceAccount:$SERVICE_ACCOUNT --role roles/secretmanager.secretAccessor; then
+    echo -e "\e[0;31mFailed to grant permission to read secret\e[0m]"
+    echo "cleaning up"
+    bash cleanup.sh
+    exit 1
+fi
 
 echo "Starting build"
 if ! gcloud builds submit --region=$REGION --config cloudbuild.yaml ; then
