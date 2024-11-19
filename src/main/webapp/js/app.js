@@ -551,7 +551,7 @@ function makeAdPage(){
         showAdPage('normal');
     }
     else{
-        sidebarItems= ["nav_AD_off","Disabled", "javascript:showAdPage('off')"];    
+        sidebarItems= [["nav_AD_off","Disabled", "javascript:showAdPage('off')"]];    
         makeSideBar(sidebarItems);
         showAdPage('off');
     }
