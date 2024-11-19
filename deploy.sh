@@ -224,10 +224,10 @@ do
         if gcloud projects add-iam-policy-binding $PROJECT_ID --member=serviceAccount:$SERVICE_ACCOUNT --role="$role" --no-user-output-enabled ; then
             echo -n "."
         else
-            echo "\nFailed to add required permission to $SERVICE_ACCOUNT: $role\n"
+            echo "\e[0;31m\nFailed to add required permission to $SERVICE_ACCOUNT: $role\n\e[0m"
             echo "cleaning up"
             bash cleanup.sh
-            echo "Please rerun the script to try again"
+            echo "\e[0;31mPlease rerun the script to try again\e[0m"
             exit 1
         fi
     fi
@@ -239,7 +239,7 @@ echo ""
 
 # Create the API key needed by the demo. It should be restricted to the reCAPTCHA service.
 # Fetch the key name for the cleanup script
-APIKEYNAME=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" 2>/dev/null | jq '.response.name' | cut -d'"' -f2)
+APIKEYNAME=$(gcloud services api-keys create --api-target=service=recaptchaenterprise.googleapis.com --display-name="reCAPTCHA Heroes Demo API key" --format="json" --quiet 2>/dev/null | jq '.response.name' | cut -d'"' -f2)
 echo "gcloud services api-keys delete $APIKEYNAME --quiet" >> cleanup.sh
 # Then fetch the secret value for use in the script itself
 APIKEY=$(gcloud services api-keys get-key-string $APIKEYNAME | cut -d" " -f2)
@@ -268,25 +268,28 @@ echo "gcloud storage rm --recursive gs://$LOG_BUCKET --quiet" >> cleanup.sh
 echo "Creating log bucket gs://$LOG_BUCKET"
 gcloud storage buckets create gs://$LOG_BUCKET
 
-# Create the cloudbuild.yaml. This replaces variables in the template
-echo "Creating cloudbuild.yaml"
-sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
-
 echo "gcloud artifacts repositories delete recaptcha-heroes-docker-repo-$SHORTCOMMIT --location=$REGION --quiet" >> cleanup.sh
 echo "Creating artifact registry repository recaptcha-heroes-docker-repo-$SHORTCOMMIT"
-gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
-    --repository-format=docker \
-    --location=$REGION --description="Docker repository"
+if ! gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT --repository-format=docker --location=$REGION --description="Docker repository"; then
+    echo "\e[0;31mFailed to create artifact registry repository\e[0m"
+    bash cleanup.sh
+    echo "\e[0;31mPlease rerun the script to try again\e[0m"
+    exit 1
+fi
 
 # Add delete service to cleanup
 echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT --region=$REGION --quiet" >> cleanup.sh
 
+# Create the cloudbuild.yaml. This replaces variables in the template
+echo "Creating cloudbuild.yaml"
+sed -e "s/LOG_BUCKET/$LOG_BUCKET/" -e "s/SHORTCOMMIT/$SHORTCOMMIT/" -e "s/SERVICE_ACCOUNT/$SERVICE_ACCOUNT/" -e "s/REGION/$REGION/" -e "s/PROJECT_ID/$PROJECT_ID/" -e "s/APIKEY/$APIKEY/" -e "s/PROJECT_NUMBER/$PROJECT_NUMBER/" -e "s/COMMITID/$COMMITID/" -e "s/APIKEY/$APIKEY/" -e "s/V3KEY/$V3KEY/" -e "s/V2KEY/$V2KEY/" -e "s/TEST2KEY/$TEST2KEY/" -e "s/TEST8KEY/$TEST8KEY/" -e "s/EXPRESSKEY/$EXPRESSKEY/" cloudbuild-template.yaml > cloudbuild.yaml
+
 echo "Starting build"
 if ! gcloud builds submit --region=$REGION --config cloudbuild.yaml ; then
-    echo "Build failed"
+    echo "\e[0;31mBuild failed \e[0m"
     rm cloudbuild.yaml
     bash cleanup.sh
-    echo "Please rerun the script to try again"
+    echo "\e[0;31mBPlease rerun the script to try again\e[0m"
     exit 1
 fi
 
