@@ -100,6 +100,9 @@ gcloud services enable cloudbuild.googleapis.com
 echo " - Cloud Run"
 gcloud services enable run.googleapis.com
 
+echo " - Secrets Manager"
+gcloud services enable secretmanager.googleapis.com
+
 #get the current default region if set
 export REGION=$(gcloud config get-value compute/zone)
 regions=()
@@ -299,14 +302,10 @@ fi
 echo "Starting build"
 if ! gcloud builds submit --region=$REGION --config cloudbuild.yaml ; then
     echo -e "\e[0;31mBuild failed \e[0m"
-    rm cloudbuild.yaml
     bash cleanup.sh
     echo -e "\e[0;31mBPlease rerun the script to try again\e[0m"
     exit 1
 fi
-
-# The cloudbuild.yaml file will contain a secret so remove it when done
-rm cloudbuild.yaml
 
 # Stats for nerds
 echo Start $START 
