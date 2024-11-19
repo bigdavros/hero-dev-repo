@@ -279,7 +279,7 @@ gcloud artifacts repositories create recaptcha-heroes-docker-repo-$SHORTCOMMIT \
     --location=$REGION --description="Docker repository"
 
 # Add delete service to cleanup
-echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT --region=$REGION" >> cleanup.sh
+echo "gcloud run services delete recaptcha-demo-service-$SHORTCOMMIT --region=$REGION --quiet" >> cleanup.sh
 
 echo "Starting build"
 if ! gcloud builds submit --region=$REGION --config cloudbuild.yaml ; then
