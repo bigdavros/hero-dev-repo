@@ -545,7 +545,6 @@ function makeAdPage(){
     ];
     
     recreateInnerContentWireframe("Account Defender");
-    console.log("adStatus is "+adStatus+". So...");
     if(adStatus){
         makeSideBar(sidebarItems);
         showAdPage('normal');
@@ -846,11 +845,9 @@ function pageLoad(){
         function(data, status, xhr) {
             console.log("data: "+data);
             if(data=="true"){
-                console.log("adStatus is boolean true ");
                 adStatus=true;
             }
             else{
-                console.log("adStatus is boolean false ");
                 adStatus=false;
             }
         }
