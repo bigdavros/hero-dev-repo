@@ -360,13 +360,7 @@ public class Api extends HttpServlet {
                 }
                 else if(jsonObject.has("type") && jsonObject.getString("type").equals("ADcheck")){
                     // This is to check if AD has been enabled
-                    boolean adEnabled = isAdEnabled(projectId);
-                    if(adEnabled){
-                        out.print("1");
-                    }
-                    else{
-                        out.print("0");
-                    }
+                    out.print(isAdEnabled(projectId));
                 }
                 else{
                     // if no token, action, type or subtype                    

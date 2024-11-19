@@ -837,5 +837,11 @@ function pageLoad(){
         }
     )
     .fail(function(jqxhr, settings, ex) { alert('failed, ' + ex); });
+    if(adStatus){
+        console.log("adStatus is boolean true ");
+    }
+    else{
+        console.log("adStatus is boolean false ");
+    }
     makeHeader();
 }
