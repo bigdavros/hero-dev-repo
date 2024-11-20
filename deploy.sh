@@ -267,7 +267,6 @@ echo "gcloud recaptcha keys delete $EXPRESSKEY --quiet" >> cleanup.sh
 
 #Create the logging buckets
 LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
-echo "gcloud storage rm --recursive gs://$LOG_BUCKET --quiet" >> cleanup.sh
 echo "Creating log bucket gs://$LOG_BUCKET"
 gcloud storage buckets create gs://$LOG_BUCKET
 
@@ -331,5 +330,3 @@ echo To connect to the demo use: gcloud run services proxy recaptcha-demo-servic
 # Make a .sh that will connect in case the user forgets to make note of
 # the connect command.
 echo "gcloud run services proxy recaptcha-demo-service-$SHORTCOMMIT --project $PROJECT_ID --region $REGION" > run.sh
-
-echo "To redeploy: gcloud builds submit --region=$REGION --config cloudbuild.yaml"

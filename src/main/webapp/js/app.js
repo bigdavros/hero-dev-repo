@@ -527,7 +527,7 @@ function showAdPage(type){
     }
     else if(type=="off"){
         recreateInnerContentWireframe("Enable Account Defender");
-        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">This part of the demo requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings. After enabling, it may take up to 15 minutes for the change to be implemented. Please refresh the browser when the feature has completed being enabled.</div>');
+        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">This part of the demo requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings. Please refresh the browser when the feature has completed being enabled.</div>');
     }
     else{
         recreateInnerContentWireframe("Normal Interaction");
@@ -658,7 +658,7 @@ function makePLDPage(){
         recreateInnerContentWireframe("Enable Account Defender");
         inactiveAllSidebar(sidebarItems);
         document.getElementById('nav_pld_off').classList.add('active');
-        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">This part of the demo requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings. After enabling, it may take up to 15 minutes for the change to be implemented. Please refresh the browser when the feature has completed being enabled.</div>');
+        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">This part of the demo requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings; this is because Password Leak Detection is a sub feature of Account Defender. Please refresh the browser when the feature has completed being enabled.</div>');
     }
 }
 
