@@ -69,24 +69,20 @@ public class Api extends HttpServlet {
     private String expressKey = System.getenv("EXPRESSKEY"); 
 
     // Quickest way to check Account Defender is enabled is to perform a request that is not featured in the demo.
-    // This feature is to find related accounts, which is an advanced feature. For more info see the docs at
-    // https://cloud.google.com/recaptcha/docs/account-query-apis
+    // This feature is to find related account groups, which is an advanced feature. For more info see the docs at
+    // https://cloud.google.com/recaptcha/docs/account-query-apis. If this fails it's because AD is not enabled.
     public boolean isAdEnabled(String projectId) throws IOException {
         try {
             RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings());
             ListRelatedAccountGroupsRequest request =
                 ListRelatedAccountGroupsRequest.newBuilder().setParent(ProjectName.of(projectId).toString()).build();
-
-            System.out.println("Listing related account groups..");
-            client.listRelatedAccountGroups(request).iterateAll();            
-            System.out.println("Returning true..");            
+            // this next command fails if AD is switched off and is why thic block has to be inside a try catch
+            client.listRelatedAccountGroups(request).iterateAll(); 
             return true;
-
         }
         catch(Exception e){
-            System.out.println("isAdEnabled error: "+e);
+            return false;
         }
-        return false;
     }
 
     private RecaptchaEnterpriseServiceSettings settings(){
