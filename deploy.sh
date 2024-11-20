@@ -77,33 +77,7 @@ while : ; do
     esac
 done
 
-# Enable the required services
-echo "Checking and enabling services in project $PROJECT_ID, this could take a minute or two."
-
-#This could be one command, but the time to enable all the services can be in the miniutes,
-#so running one at a time gives the user some feedback.
-echo " - reCAPTCHA"
-gcloud services enable recaptchaenterprise.googleapis.com 
-
-echo " - Compute"
-gcloud services enable compute.googleapis.com 
-
-echo " - Storage"
-gcloud services enable storage.googleapis.com 
-
-echo " - Artifact Registry"
-gcloud services enable artifactregistry.googleapis.com 
-
-echo " - Cloud Build"
-gcloud services enable cloudbuild.googleapis.com 
-
-echo " - Cloud Run"
-gcloud services enable run.googleapis.com
-
-echo " - Secrets Manager"
-gcloud services enable secretmanager.googleapis.com
-
-#get the current default region if set
+# get the current default region if set
 export REGION=$(gcloud config get-value compute/zone)
 regions=()
 num_regions=0
@@ -168,6 +142,32 @@ while : ; do
     esac
 done
 
+# Enable the required services
+echo "Checking and enabling services in project $PROJECT_ID, this could take a minute or two."
+
+#This could be one command, but the time to enable all the services can be in the miniutes,
+#so running one at a time gives the user some feedback.
+echo " - reCAPTCHA"
+gcloud services enable recaptchaenterprise.googleapis.com 
+
+echo " - Compute"
+gcloud services enable compute.googleapis.com 
+
+echo " - Storage"
+gcloud services enable storage.googleapis.com 
+
+echo " - Artifact Registry"
+gcloud services enable artifactregistry.googleapis.com 
+
+echo " - Cloud Build"
+gcloud services enable cloudbuild.googleapis.com 
+
+echo " - Cloud Run"
+gcloud services enable run.googleapis.com
+
+echo " - Secrets Manager"
+gcloud services enable secretmanager.googleapis.com
+
 # check if cleanup.sh already exists from prior run, rename it if it does
 # The cleanup script created can be used to nuke everything afterwards
 # It's important that cleanup commands are added before a create command
@@ -184,7 +184,7 @@ SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 
 #Add removal of this service account to the cleanup before it's created
-echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet --no-user-output-enabled > /dev/null 2>&1" >> cleanup.sh
+echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet --no-user-output-enabled 2>&1 /dev/null" >> cleanup.sh
 
 # Create S/A
 echo "Creating service account $SERVICE_ACCOUNT"
@@ -265,8 +265,10 @@ EXPRESSKEY=$(gcloud recaptcha keys create --display-name=heroes-express-site-key
 echo Created express site-key $EXPRESSKEY
 echo "gcloud recaptcha keys delete $EXPRESSKEY --quiet" >> cleanup.sh
 
-#Create the logging buckets
-LOG_BUCKET=recaptcha-heroes-logs-$SHORTCOMMIT
+# Create the logging buckets, use START instead of SHORTCOMMIT because bucket names are global
+# so there would be multiple buckets with the same name on SHORTCOMMIT.
+LOG_BUCKET=recaptcha-heroes-logs-$START
+
 echo "Creating log bucket gs://$LOG_BUCKET"
 gcloud storage buckets create gs://$LOG_BUCKET
 

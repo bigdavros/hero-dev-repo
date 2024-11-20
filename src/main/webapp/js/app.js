@@ -839,11 +839,11 @@ function makeSideBar(sidebarItems){
  */
 
 function pageLoad(){
+    // Make a call to wake up the API and find out if AD is enabled or not
     let request_json = "{\"type\":\"ADcheck\"}";
     $.post('api',
         request_json,
         function(data, status, xhr) {
-            console.log("data: "+data);
             if(data=="true"){
                 adStatus=true;
             }

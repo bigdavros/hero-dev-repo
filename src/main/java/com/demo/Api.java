@@ -38,7 +38,6 @@ import com.google.recaptchaenterprise.v1.CreateAssessmentRequest;
 import com.google.recaptchaenterprise.v1.Event;
 import com.google.recaptchaenterprise.v1.ListRelatedAccountGroupsRequest;
 import com.google.recaptchaenterprise.v1.ProjectName;
-import com.google.recaptchaenterprise.v1.RelatedAccountGroup;
 
 import java.util.List;
 
@@ -50,10 +49,6 @@ import com.google.api.gax.rpc.FixedHeaderProvider;
 import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest;
 import com.google.recaptchaenterprise.v1.AssessmentName;
 import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest.Annotation;
-
-
-import com.google.recaptchaenterprise.v1.RelatedAccountGroupMembership;
-import com.google.recaptchaenterprise.v1.SearchRelatedAccountGroupMembershipsRequest;
 
 /**
  * API Servlet
@@ -76,7 +71,7 @@ public class Api extends HttpServlet {
             RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings());
             ListRelatedAccountGroupsRequest request =
                 ListRelatedAccountGroupsRequest.newBuilder().setParent(ProjectName.of(projectId).toString()).build();
-            // this next command fails if AD is switched off and is why thic block has to be inside a try catch
+            // this next command fails if AD is switched off and is why this block has to be inside a try catch
             client.listRelatedAccountGroups(request).iterateAll(); 
             return true;
         }
