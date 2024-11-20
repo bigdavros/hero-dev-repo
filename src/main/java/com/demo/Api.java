@@ -78,10 +78,10 @@ public class Api extends HttpServlet {
                 ListRelatedAccountGroupsRequest.newBuilder().setParent(ProjectName.of(projectId).toString()).build();
 
             System.out.println("Listing related account groups..");
-            for (RelatedAccountGroup group : client.listRelatedAccountGroups(request).iterateAll()) {
-                System.out.println(group.getName());
-            }
+            client.listRelatedAccountGroups(request).iterateAll();            
+            System.out.println("Returning true..");            
             return true;
+
         }
         catch(Exception e){
             System.out.println("isAdEnabled error: "+e);
