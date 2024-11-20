@@ -73,7 +73,6 @@ public class Api extends HttpServlet {
         try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings())) {
             SearchRelatedAccountGroupMembershipsRequest request =
                 SearchRelatedAccountGroupMembershipsRequest.newBuilder()
-                    .setProject(projectId)
                     .setAccountId("x")
                     .build();
             System.out.println("created builder");
