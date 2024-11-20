@@ -184,7 +184,7 @@ SHORTCOMMIT=${COMMITID: -5}
 SERVICE_ACCOUNT=recaptcha-heroes-compute-${SHORTCOMMIT}@${PROJECT_ID}.iam.gserviceaccount.com
 
 #Add removal of this service account to the cleanup before it's created
-echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet --no-user-output-enabled 2>&1 /dev/null" >> cleanup.sh
+echo "gcloud iam service-accounts delete $SERVICE_ACCOUNT --quiet --no-user-output-enabled 2>&1 >/dev/null" >> cleanup.sh
 
 # Create S/A
 echo "Creating service account $SERVICE_ACCOUNT"
