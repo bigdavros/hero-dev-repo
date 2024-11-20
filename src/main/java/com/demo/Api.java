@@ -36,7 +36,9 @@ import com.google.protobuf.ByteString;
 import com.google.recaptchaenterprise.v1.Assessment;
 import com.google.recaptchaenterprise.v1.CreateAssessmentRequest;
 import com.google.recaptchaenterprise.v1.Event;
+import com.google.recaptchaenterprise.v1.ListRelatedAccountGroupsRequest;
 import com.google.recaptchaenterprise.v1.ProjectName;
+import com.google.recaptchaenterprise.v1.RelatedAccountGroup;
 
 import java.util.List;
 
@@ -70,20 +72,19 @@ public class Api extends HttpServlet {
     // This feature is to find related accounts, which is an advanced feature. For more info see the docs at
     // https://cloud.google.com/recaptcha/docs/account-query-apis
     public boolean isAdEnabled(String projectId) throws IOException {
-        try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings())) {
-            SearchRelatedAccountGroupMembershipsRequest request =
-                SearchRelatedAccountGroupMembershipsRequest.newBuilder()
-                    .setAccountId("x")
-                    .build();
-            System.out.println("created builder");
-            
-            client.searchRelatedAccountGroupMemberships(request).toString();
-            System.out.println("used builder");
-            System.out.println("Finished searching related account group memberships");
+        try {
+            RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings());
+            ListRelatedAccountGroupsRequest request =
+                ListRelatedAccountGroupsRequest.newBuilder().setParent(ProjectName.of(projectId).toString()).build();
+
+            System.out.println("Listing related account groups..");
+            for (RelatedAccountGroup group : client.listRelatedAccountGroups(request).iterateAll()) {
+                System.out.println(group.getName());
+            }
             return true;
         }
         catch(Exception e){
-            System.out.println("searchRelatedAccountGroupMemberships error: "+e);
+            System.out.println("isAdEnabled error: "+e);
         }
         return false;
     }
