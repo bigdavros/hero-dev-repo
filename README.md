@@ -61,3 +61,35 @@ Run the command below on Cloud Shell to destroy the resources.
 ```
 bash cleanup.sh
 ```
+
+## Browsing the Demo
+The demo covers four main features:
+ - Enterprise (Scoring and bot detection)
+ - Annotations (feedback to reCAPTCHA)
+ - Account Defender
+ - Password Leak Detection
+
+### Enterprise
+CAPTCHA is a bad acronym for "Completely Automated Public Turing test to tell Computers and Humans Apart", so the score is rated from 1.0 down to 0.0 on how likely the visitor is to be a human. A score of 1 is a human.
+
+When reCAPTCHA makes a site key, it needs time to "train" because it is fundamentally a machine learning model. While it is training the score will always be 0.9 with a reason code of "LOW_CONFIDENCE_SCORE". For this demo, the site keys are freshly made so expect a score of 0.9 in most places.
+
+The Enterprise scoring page covers:
+ - Score based challenges. This is where the JavaScript front end makes a token, then the application front end sends that token to a server to get checked. Learn more about interpretting scores [here](https://cloud.google.com/recaptcha-enterprise/docs/interpreting-scores).
+ - Test 0.2. This is where the score is hard coded in the Google Cloud console to always return 0.2. This should only be used in test environments. Learn more about test keys [here](https://cloud.google.com/recaptcha/docs/faq#id_like_to_run_automated_tests_with_what_should_i_do).
+- Test 0.8. This is where the score is hard coded in the Google Cloud console to always return 0.8. This should only be used in test environments. Learn more about test keys [here](https://cloud.google.com/recaptcha/docs/faq#id_like_to_run_automated_tests_with_what_should_i_do). 
+- No image. You'll notice that the reCAPTCHA logo is hovering in a badge at the bottom right of the page. If you want to switch this off you'll need to place an inline notice. Learn more about hiding the badge [here](https://cloud.google.com/recaptcha/docs/faq#id_like_to_hide_the_badge_what_is_allowed).
+- Visual Challenge. Love checkboxes and fire hydrants? This is for you. Learn more about Visual Challenges [here](https://cloud.google.com/recaptcha/docs/visual-challenge).
+- Express. Have an application or use case that can't use JavaScript or a mobile SDK? Perhaps a set top box or thick client application? Get a less accurate score using only network data. Learn more about Express Challenges [here](https://cloud.google.com/recaptcha/docs/express-challenge).
+
+### Annotations
+You can supply feedback to reCAPTCHA through annotations. This is where you tell reCAPTCHA if it got something right, or indeed wrong. You can tell it something was LEGITIMATE or FRAUDULENT with a reason (or without). reCAPTCHA engineers will use this data to improve the service, which will make your scores more accurate. Learn more about annotations [here](https://cloud.google.com/recaptcha/docs/annotations).
+
+### Account Defender
+This feature provides advanced protection against account takeover and malicious creation activity. It needs to be switched on in the Google Cloud console.
+<img src="assets/settings.png" width="400">
+<img src="assets/find-ad-settings.png" width="400">
+<img src="assets/ad-switch-on.png" width="400">
+
+
+
