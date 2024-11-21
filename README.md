@@ -21,7 +21,7 @@ This click to deploy demo implements reCAPTCHA into an application, and reveals 
 The main components that we would be setting up are (to learn more about these products, click on the hyperlinks):
 
 * [reCAPTCHA](https://cloud.google.com/security/products/recaptcha) - reCAPTCHA is a service that helps to protect your websites and mobile applications from spam and abuse..
-* [Cloud Build](https://cloud.google.com/build) - This demo includes an that will be built in Google Cloud Build.
+* [Cloud Build](https://cloud.google.com/build) - This demo includes an application that will be built in Google Cloud Build.
 * [Cloud Run](https://cloud.google.com/run) - The demo application will be deployed to Google Cloud using Cloud run, where it can then be used through Cloud Run proxy.
 
 ## Costs
