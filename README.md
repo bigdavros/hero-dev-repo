@@ -94,7 +94,7 @@ This feature provides advanced protection against account takeover and malicious
 <img src="assets/ad-switch-on.png" width="400">
 
 ### Using Account Defender
-Account defender works by providing a user id. 
+Account defender works by providing a user id. You can learn more about the feature, including all sub features [here](https://cloud.google.com/recaptcha-enterprise/docs/account-defender).
 
 For the Normal usage here are some things to try:
  - Check the vistor and see what is sent and what is returned by reCAPTCHA.
@@ -113,7 +113,7 @@ For account creation try this:
  - Notice how you get a warning of SUSPICIOUS_ACCOUNT_CREATION when a suspicious visitor makes an account. You can use this to detect phony sign ups to your application.
 
 ### Password Leak Detection
-Password Leak Detection detects leaked passwords. We spent a long time thinking about the name for this feature.
+Password Leak Detection detects leaked passwords. We spent a long time thinking about the name for this feature. You can learn more about this feature [here](https://cloud.google.com/recaptcha-enterprise/docs/password-leak-detection).
 
 Unlike other products, reCAPTCHA Password Leak Detection checks if the username and password are in a breach, rather than just the password. This gives a much better understanding on how at risk a user is.
 
