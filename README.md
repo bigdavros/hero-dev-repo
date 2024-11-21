@@ -10,10 +10,6 @@ reCAPTCHA leverages a sophisticated and adaptable risk analysis engine to shield
 
 This click to deploy demo implements reCAPTCHA into an application, and reveals on the web page the results of the API calls made. It demonstrates the key functionality of the product along with some of the advanced protection features.
 
-
-
-* __Protection from OWASP Automated Attacks__: 
-
 ## Architecture
 
 <p align="center"> <img src="assets/architecture.png" width="700"> </p>
