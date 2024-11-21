@@ -111,7 +111,8 @@ For account creation try this:
  - Check the visitor "nasty_fraudster_123@example.com". reCAPTCHA knows something about this user from previous activity on the internet.
  - Notice how you get a warning of SUSPICIOUS_ACCOUNT_CREATION when a suspicious visitor makes an account. You can use this to detect phony sign ups to your application.
 
-*  Please note that parts of the demo are not "live". If you look at the Java Source code you can see that some values are changed on the fly just to show how it would present in a real scenario. This is because it is really really hard to trick machine learning as powerful as reCAPTCHA, and much easier to change variable values in a demo.
+Demo disclaimer for Account Defender features.
+ -  Please note that parts of the demo are not "live". If you look at the Java Source code you can see that some values are changed on the fly just to show how it would present in a real scenario. This is because it is really really hard to trick machine learning as powerful as reCAPTCHA, and much easier to change variable values in a demo.
 
 ### Password Leak Detection
 Password Leak Detection detects leaked passwords. We spent a long time thinking about the name for this feature. You can learn more about this feature [here](https://cloud.google.com/recaptcha-enterprise/docs/password-leak-detection).
