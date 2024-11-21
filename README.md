@@ -85,7 +85,7 @@ The Enterprise scoring page covers:
 ### Annotations
 You can supply feedback to reCAPTCHA through annotations. This is where you tell reCAPTCHA if it got something right, or indeed wrong. You can tell it something was LEGITIMATE or FRAUDULENT with a reason (or without). reCAPTCHA engineers will use this data to improve the service, which will make your scores more accurate. Learn more about annotations [here](https://cloud.google.com/recaptcha/docs/annotations).
 
-### Account Defender
+### Switch on Account Defender
 This feature provides advanced protection against account takeover and malicious creation activity. It needs to be switched on in the Google Cloud console.
 <img src="assets/settings.png" width="400">
 
@@ -93,5 +93,29 @@ This feature provides advanced protection against account takeover and malicious
 
 <img src="assets/ad-switch-on.png" width="400">
 
+### Using Account Defender
+Account defender works by providing a user id. 
 
+For the Normal usage here are some things to try:
+ - Check the vistor and see what is sent and what is returned by reCAPTCHA.
+ - Click on the annotate button to confirm that this visitor is LEGITIMATE (there's a button on the page for this)
+ - Check the same visitor once again. See how the response now says "PROFILE_MATCH" for your visitor. This is because Account Defender now recognises the visitor and everything about the token that was made.
+ - Make a new user id by pressing the refresh button and check the user now. The PROFILE_MATCH is now gone because the user id has changed.
+ - Annotate this user too so that the rest of this section will make sense.
+
+ For the unusual usage here is something to try:
+  - The location is set to somewhere far from the place you are actually logging in from. Check the visitor.
+  - See how Account Defender has detected that this login is suspicious. This is because it doesn't match the profile made from the last step.
+  - Please note that this part of the demo is not "live". If you look at the Java Source code these values are changed on the fly just to show how it would present.
+
+For account creation try this:
+ - Check the visitor "nasty_fraudster_123@example.com". reCAPTCHA knows something about this user from previous activity on the internet.
+ - Notice how you get a warning of SUSPICIOUS_ACCOUNT_CREATION when a suspicious visitor makes an account. You can use this to detect phony sign ups to your application.
+
+### Password Leak Detection
+Password Leak Detection detects leaked passwords. We spent a long time thinking about the name for this feature.
+
+Unlike other products, reCAPTCHA Password Leak Detection checks if the username and password are in a breach, rather than just the password. This gives a much better understanding on how at risk a user is.
+
+You can test a username/password using the form. You can do this using our privacy preserving algorithms. Some examples are included in the side menu. There's a small notice of "Leaked!" or "No leak found" on the demo page after you check.
 
