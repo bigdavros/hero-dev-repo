@@ -88,7 +88,9 @@ You can supply feedback to reCAPTCHA through annotations. This is where you tell
 ### Account Defender
 This feature provides advanced protection against account takeover and malicious creation activity. It needs to be switched on in the Google Cloud console.
 <img src="assets/settings.png" width="400">
+
 <img src="assets/find-ad-settings.png" width="400">
+
 <img src="assets/ad-switch-on.png" width="400">
 
 
