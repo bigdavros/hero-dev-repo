@@ -465,6 +465,7 @@ function fetchAnnotationDropdown(){
         ["LEGITIMATE", "INITIATED_TWO_FACTOR"],
         ["LEGITIMATE", "PASSED_TWO_FACTOR"],
         ["LEGITIMATE", "CORRECT_PASSWORD"],
+        ["FRAUDULENT", "REASON_UNSPECIFIED"],
         ["FRAUDULENT", "CHARGEBACK"],
         ["FRAUDULENT", "CHARGEBACK_FRAUD"],
         ["FRAUDULENT", "PAYMENT_HEURISTICS"],
