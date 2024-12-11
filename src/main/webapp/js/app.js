@@ -439,7 +439,61 @@ function handleAdDemoResponse(reply){
     adAnnoateAssessmentId=atob(reply.result).substring(atob(reply.result).indexOf("projects/"),atob(reply.result).indexOf("\"\n"));
     shortAssessmentId=adAnnoateAssessmentId.substring(adAnnoateAssessmentId.lastIndexOf("/")+1,adAnnoateAssessmentId.length);
     
-    document.getElementById("annotate_assessment_AD").innerHTML="<p align=\"center\">Annotate assessment?<br><span id=\"assIdAd\">"+shortAssessmentId+"</span><br><button type=\"button\" class=\"btn btn-primary btn-block mb-4\" onclick=\"annotateAD();\" align=\"center\">Annotate</button></p>";
+    document.getElementById("annotate_assessment_AD").innerHTML=`
+    <p align=\"center\">Annotate assessment <b><span id=\"assIdAd\">"+shortAssessmentId+"</span></b><br><button type=\"button\" class=\"btn btn-primary btn-block mb-4\" onclick=\"annotateAD();\" align=\"center\">Annotate</button></p>
+    <div class="btn-group">
+        <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Action
+        </button>
+        <div class="dropdown-menu">
+            <a class="dropdown-item" href="#">LEGITIMATE</a>
+            <a class="dropdown-item" href="#">PASSWORD_CORRECT</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">FRAUDULENT</a>
+            <a class="dropdown-item" href="#">PASSWORD_INCORRECT</a>
+        </div>
+    </div>
+    `;
+}
+
+function fetchAnnotationDropdown(){
+    
+    let annotation_items = [
+        ["LEGITIMATE", "REASON_UNSPECIFIED"],
+        ["LEGITIMATE", "REFUND"],
+        ["LEGITIMATE", "TRANSACTION_ACCEPTED"],
+        ["LEGITIMATE", "INITIATED_TWO_FACTOR"],
+        ["LEGITIMATE", "PASSED_TWO_FACTOR"],
+        ["LEGITIMATE", "CORRECT_PASSWORD"],
+        ["FRAUDULENT", "CHARGEBACK"],
+        ["FRAUDULENT", "CHARGEBACK_FRAUD"],
+        ["FRAUDULENT", "PAYMENT_HEURISTICS"],
+        ["FRAUDULENT", "CHARGEBACK_DISPUTE"],
+        ["FRAUDULENT", "REFUND_FRAUD"],
+        ["FRAUDULENT", "REFUND"],
+        ["FRAUDULENT", "TRANSACTION_DECLINED"],
+        ["FRAUDULENT", "FAILED_TWO_FACTOR"],
+        ["FRAUDULENT", "INCORRECT_PASSWORD"],
+        ["FRAUDULENT", "SOCIAL_SPAM"]
+      ];
+    let dropdown_head = `
+    <p align=\"center\">Annotate assessment <b><span id=\"assIdAd\">"+shortAssessmentId+"</span></b><br><button type=\"button\" class=\"btn btn-primary btn-block mb-4\" onclick=\"annotateAD();\" align=\"center\">Annotate</button></p>
+    <div class="btn-group">
+        <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Annotate
+        </button>
+        <div class="dropdown-menu">
+    `;
+    let dropdown_tail = `
+        </div>
+    </div>
+    `;
+    let dropdown_items="";
+    for (i=0;i<annotation_items.length;i++){
+        dropdown_items+=`
+        <a class="dropdown-item" href="#" onclick=\"annotateAD('`+annotation_items[i][0]+`','`+annotation_items[i][1]+`');>`+annotation_items[i][0]+` - `+annotation_items[i][1]+`</a>`;
+    }
+    return dropdown_head+dropdown_items+dropdown_tail;
 }
 
 function doAD(subtype){
@@ -486,14 +540,15 @@ function changeUserId(){
     document.getElementById("uid").innerHTML=userId+refreshIconSvg;
 }
 
-function annotateAD(){
+function annotateAD(annotation,reason){
     let request_ob = {
         type: "annotation",
+        annotation: annotation,
+        reason: reason,
         assessment_id: shortAssessmentId
     };  
     sendJson(request_ob,handleAnnotationResponse);
-    document.getElementById("annotate_assessment_AD").innerHTML="Annotated "+shortAssessmentId;
-    
+    document.getElementById("annotate_assessment_AD").innerHTML="Annotated "+shortAssessmentId;    
 }
 
 function putAdDemoForm(type,action){
