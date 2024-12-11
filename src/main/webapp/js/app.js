@@ -497,51 +497,25 @@ function annotateAD(){
 }
 
 function putAdDemoForm(type,action){
-    if(type=="normal"){
-        $('#contentpanel').append('<div id="div_normal_msg" style="display: block;"><p align="center">Thank you for logging into this site user '+username+' with user id <a href=# id="uid" alt="update" onClick="changeUserId();">'+userId+refreshIconSvg+'</a>. You are now logged in from <span class="highlight" id="location">somewhere near Genuine Location</span>.</p></div>');
-    }
-    else if(type=="unusual"){
-        $('#contentpanel').append('<div id="div_unusual_msg" style="display: block;"><p align="center">Thank you for logging into this site user '+username+' with user id <a href=# id="uid" alt="update" onClick="changeUserId();">'+userId+refreshIconSvg+'</a>. You are now logged in from <span class="highlight" id="location">somewhere near Mogadishu Somalia</span>.</p></div>');
-    }
-    else if(type=="creation"){
-        $('#contentpanel').append('<div id="div_create_msg" style="display:block"><p align="center">Thank you for <span class="highlight">creating a new account</span> "nasty_frauster_123@example.com".</p></div>');
-    }
-    
+    $('#contentpanel').append('<div id="div_normal_msg" style="display: block;"><p align="center">Thank you for logging into this site user '+username+' with user id <a href=# id="uid" alt="update" onClick="changeUserId();">'+userId+refreshIconSvg+'</a>. You are now logged in from <span class="highlight" id="location">somewhere near Genuine Location</span>.</p></div>');
     $('#contentpanel').append('<input type="hidden" id="hashedAccountId" value="'+userId+'">');
     $('#contentpanel').append('<div id="check_visitor_button" style="display:block;"><p align="center">Get account defender to check this visit?<br><button type="button" class="btn btn-primary btn-block mb-4" onclick="nuke_I_O();doAD(\''+type+'\');" align="center">Check Visitor</button></p></div>');
-    $('#contentpanel').append('<div id="annotate_assessment_AD" style="display:block;"></div>');
-    
+    $('#contentpanel').append('<div id="annotate_assessment_AD" style="display:block;"></div>');    
 }
 
 function showAdPage(type){
     inactiveAllSidebar(sidebarItems);
     document.getElementById('nav_AD_'+type).classList.add('active');
     recreatePageWireframe();
-    if(type=="unusual"){
-        recreateInnerContentWireframe("Unusual Login Behaviour");
-        putAdDemoForm(type,"v3_test2");
-    }
-    else if(type=="creation"){
-        recreateInnerContentWireframe("Suspicious Account Creation");
-        putAdDemoForm(type,"v3_test8");
-    }
-    else if(type=="off"){
-        recreateInnerContentWireframe("Enable Account Defender");
-        $('#contentpanel').append('<div id="ad_is_off" style="display:block;">This part of the demo requires Account Defender to be enabled in the Google Cloud reCAPTCHA console settings. Please refresh the browser when the feature has completed being enabled.</div>');
-    }
-    else{
-        recreateInnerContentWireframe("Normal Interaction");
-        putAdDemoForm(type,"v3_login");
-    }
+    recreateInnerContentWireframe("Account Defender");
+    putAdDemoForm(type,"v3_login");
 }
 
 function makeAdPage(){
     deselectAllHeaders();
     document.getElementById('nav_AD').classList.add('active');
     sidebarItems = [
-        ["nav_AD_normal","Normal", "javascript:showAdPage('normal')"],
-        ["nav_AD_unusual","Unusual", "javascript:showAdPage('unusual')"],
-        ["nav_AD_creation","Account Creation", "javascript:showAdPage('creation')"]
+        ["nav_AD_normal","Account Defender", "javascript:showAdPage('normal')"]
     ];
     
     recreateInnerContentWireframe("Account Defender");
