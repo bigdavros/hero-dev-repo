@@ -439,21 +439,7 @@ function handleAdDemoResponse(reply){
     adAnnoateAssessmentId=atob(reply.result).substring(atob(reply.result).indexOf("projects/"),atob(reply.result).indexOf("\"\n"));
     shortAssessmentId=adAnnoateAssessmentId.substring(adAnnoateAssessmentId.lastIndexOf("/")+1,adAnnoateAssessmentId.length);
     
-    document.getElementById("annotate_assessment_AD").innerHTML=`
-    <p align=\"center\">Annotate assessment <b><span id=\"assIdAd\">"+shortAssessmentId+"</span></b><br><button type=\"button\" class=\"btn btn-primary btn-block mb-4\" onclick=\"annotateAD();\" align=\"center\">Annotate</button></p>
-    <div class="btn-group">
-        <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Action
-        </button>
-        <div class="dropdown-menu">
-            <a class="dropdown-item" href="#">LEGITIMATE</a>
-            <a class="dropdown-item" href="#">PASSWORD_CORRECT</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">FRAUDULENT</a>
-            <a class="dropdown-item" href="#">PASSWORD_INCORRECT</a>
-        </div>
-    </div>
-    `;
+    document.getElementById("annotate_assessment_AD").innerHTML=fetchAnnotationDropdown();
 }
 
 function fetchAnnotationDropdown(){
@@ -478,7 +464,7 @@ function fetchAnnotationDropdown(){
         ["FRAUDULENT", "SOCIAL_SPAM"]
       ];
     let dropdown_head = `
-    <p align=\"center\">Annotate assessment <b><span id=\"assIdAd\">"+shortAssessmentId+"</span></b><br><button type=\"button\" class=\"btn btn-primary btn-block mb-4\" onclick=\"annotateAD();\" align=\"center\">Annotate</button></p>
+    <p align=\"center\">Annotate assessment <b><span id=\"assIdAd\">`+shortAssessmentId+`</span></b><br><button type=\"button\" class=\"btn btn-primary btn-block mb-4\" onclick=\"annotateAD();\" align=\"center\">Annotate</button></p>
     <div class="btn-group">
         <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Annotate
