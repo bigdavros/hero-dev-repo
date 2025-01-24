@@ -21,6 +21,7 @@ ARG v2key=0
 ARG test2key=0
 ARG test8key=0
 ARG expresskey=0
+ARG dev=false
 
 RUN echo "#!/usr/bin/env bash" > /newcatalina.sh
 RUN echo ${projectId} | awk '{print "export PROJECTID="$0}'>> /newcatalina.sh
@@ -54,11 +55,20 @@ RUN chown -R tomcat webapps/ work/ temp/ logs/
 
 WORKDIR /
 RUN rm -rf /opt/tomcat/webapps/ROOT
-RUN git clone https://github.com/bigdavros/hero-dev-repo
 
-WORKDIR /hero-dev-repo
-RUN mvn package
-RUN mv target/demo-container.war /opt/tomcat/webapps/ROOT.war
+ADD target/demo-container.war /demo-container.war
+
+RUN if [ "$development" = "true" ] ; then \
+    mv demo-container.war /opt/tomcat/webapps/ROOT.war  ; \
+fi 
+
+RUN if [ "$development" = "false" ] ; then \
+    git clone https://github.com/bigdavros/hero-dev-repo; cd /hero-dev-repo; mvn package; mv target/demo-container.war /opt/tomcat/webapps/ROOT.war; \
+fi
+
+#WORKDIR /hero-dev-repo
+#RUN mvn package
+#RUN mv target/demo-container.war /opt/tomcat/webapps/ROOT.war
 
 RUN sed 's/#!\/usr\/bin\/env bash//g' /opt/tomcat/bin/catalina.sh >> /newcatalina.sh && cp /newcatalina.sh /opt/tomcat/bin/catalina.sh && chmod +x /opt/tomcat/bin/catalina.sh
 
