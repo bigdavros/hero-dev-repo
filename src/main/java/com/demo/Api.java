@@ -47,6 +47,7 @@ import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.rpc.FixedHeaderProvider;
 
 import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest;
+import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest.Reason;
 import com.google.recaptchaenterprise.v1.AssessmentName;
 import com.google.recaptchaenterprise.v1.AnnotateAssessmentRequest.Annotation;
 
@@ -132,18 +133,47 @@ public class Api extends HttpServlet {
         return pldReply;
     }
 
-    private void annotate(String assessmentId) throws Exception{
+    private Reply annotate(String assessmentId, String annotation, String reason) throws Exception{
+        Reply reply = new Reply();
+        Annotation legitOrFraud = Annotation.LEGITIMATE;
+        if(annotation.equals("FRAUDULENT")) legitOrFraud = Annotation.FRAUDULENT;
+        Reason annotationReason = Reason.valueOf(reason);
+        
+        String base64httpReplyRaw = "HTTP/2 200 \\r<br>\n" + //
+                                    "content-type: application/json; charset=UTF-8\\r<br>\n" + //
+                                    "vary: X-Origin\\r<br>\n" + //
+                                    "vary: Referer\\r<br>\n" + //
+                                    "vary: Origin,Accept-Encoding\\r<br>\n" + //
+                                    "server: scaffolding on HTTPServer2\\r<br>\n" + //
+                                    "cache-control: private\\r<br>\n" + //
+                                    "x-xss-protection: 0\\r<br>\n" + //
+                                    "x-frame-options: SAMEORIGIN\\r<br>\n" + //
+                                    "x-content-type-options: nosniff\\r<br>\n" + //
+                                    "alt-svc: h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000\\r<br>\n" + //
+                                    "accept-ranges: none\\r<br>\n" + //
+                                    "\\r<br>\n" + //
+                                    "{}<br>";
+    
         try (RecaptchaEnterpriseServiceClient client = RecaptchaEnterpriseServiceClient.create(settings())) {
             AnnotateAssessmentRequest annotateAssessmentRequest =
                 AnnotateAssessmentRequest.newBuilder()
                     .setName(AssessmentName.of(projectId, assessmentId).toString())
-                    .setAnnotation(Annotation.LEGITIMATE)
+                    .setAnnotation(legitOrFraud).addReasons(annotationReason)
                     .build();
+            if(annotationReason == Reason.REASON_UNSPECIFIED){
+                annotateAssessmentRequest = AnnotateAssessmentRequest.newBuilder()
+                .setName(AssessmentName.of(projectId, assessmentId).toString())
+                .setAnnotation(legitOrFraud)
+                .build();
+            }
             client.annotateAssessment(annotateAssessmentRequest);
+            reply.setData(annotateAssessmentRequest.toString());
+            reply.setResult(base64httpReplyRaw);
         }
         catch(Exception e){
             System.out.println("annotate error: "+e);
         }
+        return reply;
     }
 
     private Reply error(String msg){
@@ -343,9 +373,9 @@ public class Api extends HttpServlet {
                     // This is {"annotation":"LEGITIMATE"}
                     String base64httpRequestBody = "eyJhbm5vdGF0aW9uIjoiTEVHSVRJTUFURSJ9"; 
                     // This is a dmummy HTTP header and empty {}
-                    String base64httpReplyRaw = "SFRUUC8yIDIwMCBccjxicj4KY29udGVudC10eXBlOiBhcHBsaWNhdGlvbi9qc29uOyBjaGFyc2V0PVVURi04XHI8YnI+CnZhcnk6IFgtT3JpZ2luXHI8YnI+CnZhcnk6IFJlZmVyZXJccjxicj4KdmFyeTogT3JpZ2luLEFjY2VwdC1FbmNvZGluZ1xyPGJyPgpkYXRlOiBNb24sIDEzIEZlYiAyMDIzIDEwOjU4OjI2IEdNVFxyPGJyPgpzZXJ2ZXI6IHNjYWZmb2xkaW5nIG9uIEhUVFBTZXJ2ZXIyXHI8YnI+CmNhY2hlLWNvbnRyb2w6IHByaXZhdGVccjxicj4KeC14c3MtcHJvdGVjdGlvbjogMFxyPGJyPgp4LWZyYW1lLW9wdGlvbnM6IFNBTUVPUklHSU5ccjxicj4KeC1jb250ZW50LXR5cGUtb3B0aW9uczogbm9zbmlmZlxyPGJyPgphbHQtc3ZjOiBoMz0iOjQ0MyI7IG1hPTI1OTIwMDAsaDMtMjk9Ijo0NDMiOyBtYT0yNTkyMDAwXHI8YnI+CmFjY2VwdC1yYW5nZXM6IG5vbmVccjxicj4KXHI8YnI+Cnt9PGJyPg==";
-                    annotate(jsonObject.getString("assessment_id"));
-                    out.println("{\"data\":\""+base64httpRequestBody+"\",\"result\":\""+base64httpReplyRaw+"\"}");                        
+                    
+                    Reply reply = annotate(jsonObject.getString("assessment_id"),jsonObject.getString("annotation"),jsonObject.getString("reason"));
+                    out.println(reply.asJSON());                        
                 }
                 else if(jsonObject.has("type") && jsonObject.getString("type").equals("ADcheck")){
                     // This is to check if AD has been enabled

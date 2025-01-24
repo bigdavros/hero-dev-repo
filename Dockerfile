@@ -23,18 +23,6 @@ ARG test8key=0
 ARG expresskey=0
 ARG dev=false
 
-RUN echo "#!/usr/bin/env bash" > /newcatalina.sh
-RUN echo ${projectId} | awk '{print "export PROJECTID="$0}'>> /newcatalina.sh
-RUN echo ${comitid} | awk '{print "export COMMITID="$0}'>> /newcatalina.sh
-RUN echo ${apikey} | awk '{print "export APIKEY="$0}'>> /newcatalina.sh
-RUN echo ${v3key} | awk '{print "export V3KEY="$0}'>> /newcatalina.sh
-RUN echo ${v2key} | awk '{print "export V2KEY="$0}'>> /newcatalina.sh
-RUN echo ${test2key} | awk '{print "export TEST2KEY="$0}'>> /newcatalina.sh
-RUN echo ${test8key} | awk '{print "export TEST8KEY="$0}'>> /newcatalina.sh
-RUN echo ${expresskey} | awk '{print "export EXPRESSKEY="$0}'>> /newcatalina.sh
-RUN export MYDATE=$(date +"%d-%b-%Y_%H:%M:%S") && echo export LASTBUILD="\"$MYDATE\"" >> /newcatalina.sh
-RUN echo "" >> /newcatalina.sh
-
 # Install Tomcat
 RUN groupadd tomcat
 RUN useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat
@@ -58,17 +46,29 @@ RUN rm -rf /opt/tomcat/webapps/ROOT
 
 ADD target/demo-container.war /demo-container.war
 
-RUN if [ "$development" = "true" ] ; then \
+RUN if [ "$dev" = "true" ] ; then \
     mv demo-container.war /opt/tomcat/webapps/ROOT.war  ; \
 fi 
 
-RUN if [ "$development" = "false" ] ; then \
+RUN if [ "$dev" = "false" ] ; then \
     git clone https://github.com/bigdavros/hero-dev-repo; cd /hero-dev-repo; mvn package; mv target/demo-container.war /opt/tomcat/webapps/ROOT.war; \
 fi
 
 #WORKDIR /hero-dev-repo
 #RUN mvn package
 #RUN mv target/demo-container.war /opt/tomcat/webapps/ROOT.war
+
+RUN echo "#!/usr/bin/env bash" > /newcatalina.sh
+RUN echo ${projectId} | awk '{print "export PROJECTID="$0}'>> /newcatalina.sh
+RUN echo ${comitid} | awk '{print "export COMMITID="$0}'>> /newcatalina.sh
+RUN echo ${apikey} | awk '{print "export APIKEY="$0}'>> /newcatalina.sh
+RUN echo ${v3key} | awk '{print "export V3KEY="$0}'>> /newcatalina.sh
+RUN echo ${v2key} | awk '{print "export V2KEY="$0}'>> /newcatalina.sh
+RUN echo ${test2key} | awk '{print "export TEST2KEY="$0}'>> /newcatalina.sh
+RUN echo ${test8key} | awk '{print "export TEST8KEY="$0}'>> /newcatalina.sh
+RUN echo ${expresskey} | awk '{print "export EXPRESSKEY="$0}'>> /newcatalina.sh
+RUN export MYDATE=$(date +"%d-%b-%Y_%H:%M:%S") && echo export LASTBUILD="\"$MYDATE\"" >> /newcatalina.sh
+RUN echo "" >> /newcatalina.sh
 
 RUN sed 's/#!\/usr\/bin\/env bash//g' /opt/tomcat/bin/catalina.sh >> /newcatalina.sh && cp /newcatalina.sh /opt/tomcat/bin/catalina.sh && chmod +x /opt/tomcat/bin/catalina.sh
 

@@ -439,49 +439,9 @@ function handleAdDemoResponse(reply){
     adAnnoateAssessmentId=atob(reply.result).substring(atob(reply.result).indexOf("projects/"),atob(reply.result).indexOf("\"\n"));
     shortAssessmentId=adAnnoateAssessmentId.substring(adAnnoateAssessmentId.lastIndexOf("/")+1,adAnnoateAssessmentId.length);
     
-    document.getElementById("annotate_assessment_AD").innerHTML=fetchAnnotationDropdown();
+    document.getElementById("annotate_assessment_AD").innerHTML=`<p align="center">Annotate assessment <b><span id="assIdAd">`+shortAssessmentId+`</span></b></p>`+getAnnotationDropdownList("annotateAD");
 }
 
-function fetchAnnotationDropdown(){
-    
-    let annotation_items = [
-        ["LEGITIMATE", "REASON_UNSPECIFIED"],
-        ["LEGITIMATE", "REFUND"],
-        ["LEGITIMATE", "TRANSACTION_ACCEPTED"],
-        ["LEGITIMATE", "INITIATED_TWO_FACTOR"],
-        ["LEGITIMATE", "PASSED_TWO_FACTOR"],
-        ["LEGITIMATE", "CORRECT_PASSWORD"],
-        ["FRAUDULENT", "REASON_UNSPECIFIED"],
-        ["FRAUDULENT", "CHARGEBACK"],
-        ["FRAUDULENT", "CHARGEBACK_FRAUD"],
-        ["FRAUDULENT", "PAYMENT_HEURISTICS"],
-        ["FRAUDULENT", "CHARGEBACK_DISPUTE"],
-        ["FRAUDULENT", "REFUND_FRAUD"],
-        ["FRAUDULENT", "REFUND"],
-        ["FRAUDULENT", "TRANSACTION_DECLINED"],
-        ["FRAUDULENT", "FAILED_TWO_FACTOR"],
-        ["FRAUDULENT", "INCORRECT_PASSWORD"],
-        ["FRAUDULENT", "SOCIAL_SPAM"]
-      ];
-    let dropdown_head = `
-    <p align=\"center\">Annotate assessment <b><span id=\"assIdAd\">`+shortAssessmentId+`</span></b><br><button type=\"button\" class=\"btn btn-primary btn-block mb-4\" onclick=\"annotateAD();\" align=\"center\">Annotate</button></p>
-    <div class="btn-group">
-        <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Annotate
-        </button>
-        <div class="dropdown-menu">
-    `;
-    let dropdown_tail = `
-        </div>
-    </div>
-    `;
-    let dropdown_items="";
-    for (i=0;i<annotation_items.length;i++){
-        dropdown_items+=`
-        <a class="dropdown-item" href="#" onclick=\"annotateAD('`+annotation_items[i][0]+`','`+annotation_items[i][1]+`');>`+annotation_items[i][0]+` - `+annotation_items[i][1]+`</a>`;
-    }
-    return dropdown_head+dropdown_items+dropdown_tail;
-}
 
 function doAD(subtype){
     let site_key = v3_site_key; //assume v3 
@@ -686,6 +646,32 @@ function makePLDPage(){
  * START Annotation API handling
  */
 
+function getAnnotationDropdownList(method){
+    return `<div class="dropdown">
+        <button type="button" id="dropdownMenuButton" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Annotate
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class=\"dropdown-item\" href=\"javascript:`+method+`('LEGITIMATE','REASON_UNSPECIFIED');\">LEGITIMATE - REASON_UNSPECIFIED</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('LEGITIMATE','REFUND');\">LEGITIMATE - REFUND</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('LEGITIMATE','TRANSACTION_ACCEPTED');\">LEGITIMATE - TRANSACTION_ACCEPTED</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('LEGITIMATE','INITIATED_TWO_FACTOR');\">LEGITIMATE - INITIATED_TWO_FACTOR</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('LEGITIMATE','PASSED_TWO_FACTOR');\">LEGITIMATE - PASSED_TWO_FACTOR</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('LEGITIMATE','CORRECT_PASSWORD');\">LEGITIMATE - CORRECT_PASSWORD</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','REASON_UNSPECIFIED');\">FRAUDULENT - REASON_UNSPECIFIED</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','CHARGEBACK');\">FRAUDULENT - CHARGEBACK</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','CHARGEBACK_FRAUD');\">FRAUDULENT - CHARGEBACK_FRAUD</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','CHARGEBACK_DISPUTE');\">FRAUDULENT - CHARGEBACK_DISPUTE</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','REFUND_FRAUD');\">FRAUDULENT - REFUND_FRAUD</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','REFUND');\">FRAUDULENT - REFUND</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','TRANSACTION_DECLINED');\">FRAUDULENT - TRANSACTION_DECLINED</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','FAILED_TWO_FACTOR');\">FRAUDULENT - FAILED_TWO_FACTOR</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','INCORRECT_PASSWORD');\">FRAUDULENT - INCORRECT_PASSWORD</a>
+            <a class=\"dropdown-item\" href=\"#" onclick=\"`+method+`('FRAUDULENT','SOCIAL_SPAM');\">FRAUDULENT - SOCIAL_SPAM</a>
+        </div>
+    </div>`;
+}
+
 function makeAnnotationPage(){
     deselectAllHeaders();
     document.getElementById('nav_annotation').classList.add('active');
@@ -707,7 +693,7 @@ function showAnnotationPage(){
 function putAnnoationDemoForm(){
 
    $('#contentpanel').append('<div id="annotation_api_form" style="display:block;"><p align="center">Annotate this assessment: <input type="text" id="annotationAssessmentId" value="" onClick="nuke_I_O();"><br><a href="#" onclick="nuke_I_O();getAnnotationAssesmentId();">Generate</a></p></div>');
-   $('#contentpanel').append('<button type="button" class="btn btn-primary btn-block mb-4" onclick="nuke_I_O();doAnnotation();" align="center">Annotate</button>');
+   $('#contentpanel').append(getAnnotationDropdownList("doAnnotation"));
 }
 
 function getAnnotationAssesmentId(){
@@ -735,13 +721,15 @@ function handleAnnotationGetAssessmentResponse(reply){
 function doAnnotation(){
     let request_ob = {
         type: "annotation",
+        annotation: "LEGITIMATE",
+        reason: "REASON_UNSPECIFIED",
         assessment_id: document.getElementById("annotationAssessmentId").value
     };  
     sendJson(request_ob,handleAnnotationResponse);
 }
 
-function handleAnnotationResponse(reply){
-    document.getElementById("i_return").innerHTML=atob(reply.data);
+function handleAnnotationResponse(reply){    
+    document.getElementById("i_return").innerHTML=returnTidyJSONfromBase64(reply.data);
     document.getElementById("o_return").innerHTML=atob(reply.result);
 }
 

@@ -40,11 +40,12 @@ public class Landing extends HttpServlet {
         out.println("<title>reCAPTCHA Enterprise Demo</title>");
         out.println("<script src=\"js/vars.js?nocache="+nocache+"\"></script>");
         out.println("<script id=\"recap\" src=\"https://www.google.com/recaptcha/enterprise.js?render="+System.getenv("V3KEY")+"&onload=pageLoad\"></script>");
-        out.println("<link href=\"third_party/bootstrap.min.css\" rel=\"stylesheet\">");
-        out.println("<script src=\"third_party/bootstrap.bundle.min.js\"></script>");
+        
         out.println("<link href=\"css/main.css\" rel=\"stylesheet\">");
         out.println("<link href=\"css/loaders.css?nocache="+nocache+"\" rel=\"stylesheet\">");
         out.println("<script src=\"third_party/jquery.min.js\"></script>");
+        out.println("<link href=\"third_party/bootstrap.min.css\" rel=\"stylesheet\">");
+        out.println("<script src=\"third_party/bootstrap.bundle.min.js\"></script>");
         out.println("<link rel=\"icon\" type=\"image/x-icon\" href=\"/favicon.ico\">");
         out.println("<script>\n let commitId = \""+System.getenv("COMMITID")+"\";\n</script>");
         out.println("</head>");
